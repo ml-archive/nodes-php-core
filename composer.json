@@ -1,0 +1,29 @@
+{
+    "name": "nodes/core",
+    "description": "Required package for all Nodes packages",
+    "keywords": [
+        "nodes",
+        "core",
+        "helpers",
+        "tools",
+        "laravel"
+    ],
+    "authors": [{
+        "name": "Morten Rugaard",
+        "email": "moru@nodes.dk",
+        "role": "Developer"
+    }, {
+        "name": "Casper Rasmussen",
+        "email": "cr@nodes.dk",
+        "role": "Developer"
+    }],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+           "Nodes\\": "src"
+        }
+    },
+    "minimum-stability": "stable"
+}
