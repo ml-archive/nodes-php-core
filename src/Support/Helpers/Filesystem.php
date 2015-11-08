@@ -1,5 +1,5 @@
 <?php
-if (!function_exists('loadDirectory')) {
+if (!function_exists('load_directory')) {
     /**
      * Load all files in directory
      *
@@ -10,7 +10,7 @@ if (!function_exists('loadDirectory')) {
      * @param  boolean $recursive Load recursively
      * @return boolean
      */
-    function loadDirectory($path, $recursive = true) {
+    function load_directory($path, $recursive = true) {
         // Make sure directory exists
         if (!file_exists($path)) {
             return false;

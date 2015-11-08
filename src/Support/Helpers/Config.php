@@ -1,5 +1,5 @@
 <?php
-if (!function_exists('prepareConfigInstances')) {
+if (!function_exists('prepare_config_instances')) {
     /**
      * Prepare an array of instantiable configuration instances.
      *
@@ -8,7 +8,7 @@ if (!function_exists('prepareConfigInstances')) {
      * @param  array $instances
      * @return array
      */
-    function prepareConfigInstances(array $instances)
+    function prepare_config_instances(array $instances)
     {
         foreach ($instances as $key => $value) {
             $instances[$key] = $this->prepareConfigInstance($value);
@@ -17,7 +17,7 @@ if (!function_exists('prepareConfigInstances')) {
     }
 }
 
-if (!function_exists('prepareConfigInstance')) {
+if (!function_exists('prepare_config_instance')) {
     /**
      * Prepare an instantiable configuration instance.
      *
@@ -26,7 +26,7 @@ if (!function_exists('prepareConfigInstance')) {
      * @param  mixed $instance
      * @return object
      */
-    function prepareConfigInstance($instance)
+    function prepare_config_instance($instance)
     {
         if (is_callable($instance)) {
             return call_user_func($instance, app());

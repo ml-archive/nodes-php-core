@@ -1,5 +1,5 @@
 <?php
-if (!function_exists('addTrailingSlash')) {
+if (!function_exists('add_trailing_slash')) {
     /**
      * Add trailing slash to string if missing.
      *
@@ -8,7 +8,7 @@ if (!function_exists('addTrailingSlash')) {
      * @param  string $string
      * @return string
      */
-    function addTrailingSlash($string)
+    function add_trailing_slash($string)
     {
         if (substr($string, -1) != '/') {
             $string .= '/';
@@ -18,7 +18,7 @@ if (!function_exists('addTrailingSlash')) {
     }
 }
 
-if (!function_exists('removeTrailingSlash')) {
+if (!function_exists('remove_trailing_slash')) {
     /**
      * Remove trailing slash from string if present.
      *
@@ -27,7 +27,7 @@ if (!function_exists('removeTrailingSlash')) {
      * @param  string $string
      * @return string
      */
-    function removeTrailingSlash($string)
+    function remove_trailing_slash($string)
     {
         if (substr($string, -1) == '/') {
             $string = substr($string, 0, strlen($string) - 1);
