@@ -8,6 +8,8 @@
         "tools",
         "laravel"
     ],
+    "license": "MIT",
+    "homepage": "http://nodesagency.com",
     "authors": [{
         "name": "Morten Rugaard",
         "email": "moru@nodes.dk",
@@ -15,7 +17,7 @@
     }, {
         "name": "Casper Rasmussen",
         "email": "cr@nodes.dk",
-        "role": "Developer"
+        "role": "CTO"
     }],
     "require": {
         "php": ">=5.4.0"
