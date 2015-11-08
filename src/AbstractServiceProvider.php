@@ -34,7 +34,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
             $path = __DIR__ . '/Support/Helpers/';
         }
 
-        // Make sure directory eixsts
+        // Make sure directory exists
         if (!file_exists($path)) {
             throw new HelperDirectoryNotFoundException(sprintf('Could not register helpers. Reason: Helper directory does not exist (%s)', $path));
         }
@@ -43,7 +43,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         $directory = scandir($path);
         $directory = array_slice($directory, 2);
 
-        // No files found in directory.
+        // No files found in directory
         if (empty($directory)) {
             return false;
         }
