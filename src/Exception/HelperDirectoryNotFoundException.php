@@ -14,13 +14,14 @@ class HelperDirectoryNotFoundException extends Exception
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @param  string  $message       Error message
-     * @param  integer $statusCode    Status code
-     * @param  string  $statusMessage Status code message
-     * @param  boolean $report        Wether or not exception should be reported
+     * @param  string  $message        Error message
+     * @param  integer $statusCode     Status code
+     * @param  string  $statusMessage  Status code message
+     * @param  array   $headers        List of headers
+     * @param  boolean $report         Wether or not exception should be reported
      */
-    public function __construct($message = 'Helper directory does not exist.', $statusCode = 500, $statusMessage = 'Helper directory does not exist', $report = false)
+    public function __construct($message = 'Helper directory does not exist.', $statusCode = 500, $statusMessage = null, $headers = [], $report = false)
     {
-        parent::__construct($message, $statusCode, $statusMessage, $report);
+        parent::__construct($message, $statusCode, $statusMessage, $headers, $report);
     }
 }
