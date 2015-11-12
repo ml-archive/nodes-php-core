@@ -2,6 +2,7 @@
 namespace Nodes\Exception;
 
 use Exception as CoreException;
+use Illuminate\Support\MessageBag;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
@@ -82,6 +83,13 @@ class Exception extends CoreException implements HttpExceptionInterface
     protected $report = true;
 
     /**
+     * Message bag of errors
+     *
+     * @var \Illuminate\Support\MessageBag
+     */
+    protected $errors;
+
+    /**
      * Exception constructor
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -107,6 +115,9 @@ class Exception extends CoreException implements HttpExceptionInterface
 
         // Set report state
         $this->report = (bool) $report;
+
+        // Set an empty message bag
+        $this->errors = new MessageBag;
     }
 
     /**
@@ -159,5 +170,46 @@ class Exception extends CoreException implements HttpExceptionInterface
     public function getReport()
     {
         return (bool) $this->report;
+    }
+
+    /**
+     * Set a message bag of errors
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  \Illuminate\Support\MessageBag $errors
+     * @return \Nodes\Exception\Exception
+     */
+    public function setErrors(MessageBag $errors)
+    {
+        $this->errors = $errors;
+        return $this;
+    }
+
+    /**
+     * Retrieve message bag of errors
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return \Illuminate\Support\MessageBag
+     */
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
+    /**
+     * Check if exception has any errors
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return boolean
+     */
+    public function hasErrors()
+    {
+        return !$this->errors->isEmpty();
     }
 }

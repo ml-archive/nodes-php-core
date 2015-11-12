@@ -10,10 +10,14 @@ if (!function_exists('prepare_config_instances')) {
      */
     function prepare_config_instances(array $instances)
     {
+        // Loaded instances
+        $loadedInstances = [];
+
         foreach ($instances as $key => $value) {
-            $instances[$key] = $this->prepareConfigInstance($value);
+            $loadedInstances[$key] = prepare_config_instance($value);
         }
-        return $instances;
+
+        return $loadedInstances;
     }
 }
 
