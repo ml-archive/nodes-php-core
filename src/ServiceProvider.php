@@ -1,5 +1,5 @@
 <?php
-namespace Nodes;
+namespace Nodes\Core;
 
 /**
  * Class ServiceProvider
