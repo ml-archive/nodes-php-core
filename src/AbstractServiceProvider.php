@@ -11,4 +11,15 @@ use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
  */
 abstract class AbstractServiceProvider extends IlluminateServiceProvider
 {
+    /**
+     * Register the service provider
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return void
+     */
+    public function register()
+    {
+    }
 }
