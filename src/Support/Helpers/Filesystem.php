@@ -35,7 +35,7 @@ if (!function_exists('load_directory')) {
 
             if (is_dir($path . $item)) {
                 // Load directory
-                loadDirectory($path . $item . '/');
+                load_directory($path . $item . '/');
             } else {
                 // Load file
                 include_once ($path . $item);
