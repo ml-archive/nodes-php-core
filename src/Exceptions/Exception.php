@@ -1,5 +1,5 @@
 <?php
-namespace Nodes\Exception;
+namespace Nodes\Exceptions;
 
 use Exception as CoreException;
 use Illuminate\Support\MessageBag;
@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 /**
  * Class Exception
  *
- * @package Nodes\Exception
+ * @package Nodes\Exceptions
  */
 class Exception extends CoreException implements HttpExceptionInterface
 {
