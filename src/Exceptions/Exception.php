@@ -66,14 +66,21 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @var integer
      */
-    protected $statusCode;
+    protected $statusCode = 500;
 
     /**
      * Status code message
      *
      * @var string
      */
-    protected $statusMessage;
+    protected $statusMessage = null;
+
+    /**
+     * headers
+     *
+     * @var array
+     */
+    protected $headers = [];
 
     /**
      * Report exception
@@ -81,6 +88,34 @@ class Exception extends CoreException implements HttpExceptionInterface
      * @var boolean
      */
     protected $report = true;
+
+    /**
+     * Meta data
+     *
+     * @var array
+     */
+    protected $meta = [];
+
+    /**
+     * Exception type
+     *
+     * @var string
+     */
+    protected $type = null;
+
+    /**
+     * Exception context
+     *
+     * @var string
+     */
+    protected $context = null;
+
+    /**
+     * Severity of exception
+     *
+     * @var string
+     */
+    protected $severity = 'error';
 
     /**
      * Message bag of errors
@@ -95,29 +130,72 @@ class Exception extends CoreException implements HttpExceptionInterface
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @param  string  $message        Error message
-     * @param  integer $statusCode     Status code
-     * @param  string  $statusMessage  Status code message
-     * @param  array   $headers        List of headers
-     * @param  boolean $report         Wether or not exception should be reported
+     * @param  string  $message   Error message
+     * @param  integer $code      Error code
+     * @param  array   $headers   List of headers
+     * @param  boolean $report    Wether or not exception should be reported
+     * @param  string  $severity  Options: "fatal", "error", "warning", "info"
      */
-    public function __construct($message, $statusCode = 500, $statusMessage = null, $headers = [], $report = true)
+    public function __construct($message, $code, $headers = [], $report = true, $severity = 'error')
     {
-        // Set status code and status message if provided
-        $this->statusCode = (int) $statusCode;
-        $this->statusMessage = $statusMessage;
-
         // Set message
         $this->message = $message;
 
+        // Set code
+        $this->setCode($code);
+
         // Set headers
-        $this->headers = $headers;
+        $this->setHeaders($headers);
 
         // Set report state
-        $this->report = (bool) $report;
+        $this->setReport($report);
 
         // Set an empty message bag
-        $this->errors = new MessageBag;
+        $this->setErrors(new MessageBag);
+    }
+
+    /**
+     * Set exception code
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string|integer $code
+     * @return $this
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+
+        // Add status message to meta array
+        $this->addMeta(['code' => $code]);
+
+        return $this;
+    }
+
+    /**
+     * Set status code
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  integer $statusCode
+     * @param  string  $message
+     * @return $this
+     */
+    public function setStatusCode($statusCode, $message = null)
+    {
+        $this->statusCode = (int) $statusCode;
+
+        // Add status message to meta array
+        $this->addMeta(['status' => ['code' => (int) $statusCode]]);
+
+        // Set optional status message if present
+        if (!empty($message)) {
+            $this->setStatusMessage($message);
+        }
+
+        return $this;
     }
 
     /**
@@ -130,7 +208,26 @@ class Exception extends CoreException implements HttpExceptionInterface
      */
     public function getStatusCode()
     {
-        return $this->statusCode;
+        return (int) $this->statusCode;
+    }
+
+    /**
+     * Set status code message
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $message
+     * @return $this
+     */
+    public function setStatusMessage($message)
+    {
+        $this->statusMessage = $message;
+
+        // Add status message to meta array
+        $this->addMeta(['status' => ['message' => $message]]);
+
+        return $this;
     }
 
     /**
@@ -147,6 +244,21 @@ class Exception extends CoreException implements HttpExceptionInterface
     }
 
     /**
+     * Set headers
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  array $headers
+     * @return $this
+     */
+    public function setHeaders(array $headers)
+    {
+        $this->headers = $headers;
+        return $this;
+    }
+
+    /**
      * Retrieve headers
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -156,11 +268,54 @@ class Exception extends CoreException implements HttpExceptionInterface
      */
     public function getHeaders()
     {
-        return $this->headers;
+        return (array) $this->headers;
     }
 
     /**
-     * Wether or not to report exception
+     * Set report flag to true
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return $this
+     */
+    public function report()
+    {
+        $this->report = true;
+        return $this;
+    }
+
+    /**
+     * Set report flag to false
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return $this
+     */
+    public function dontReport()
+    {
+        $this->report = false;
+        return $this;
+    }
+
+    /**
+     * Set whether or not to report exception
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  boolean $report
+     * @return $this
+     */
+    public function setReport($report)
+    {
+        $this->report = (bool) $report;
+        return $this;
+    }
+
+    /**
+     * Retrieve whether or not to report exception
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
@@ -173,17 +328,139 @@ class Exception extends CoreException implements HttpExceptionInterface
     }
 
     /**
+     * Add data to existing meta data
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  array $meta
+     * @return $this
+     */
+    public function addMeta(array $meta)
+    {
+        $this->meta = array_merge_recursive((array) $this->meta, $meta);
+        return $this;
+    }
+
+    /**
+     * Retrieve meta data
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return array
+     */
+    public function getMeta()
+    {
+        return (array) $this->meta;
+    }
+
+    /**
+     * Set exception type
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $type
+     * @return $this
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    /**
+     * Retrieve exception type
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set exception context
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $context
+     * @return $this
+     */
+    public function setContext($context)
+    {
+        $this->context = $context;
+        return $this;
+    }
+
+    /**
+     * Retrieve exception context
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getContext()
+    {
+        return $this->context;
+    }
+
+    /**
+     * Set severity of exception
+     *
+     * Options: "fatal", "error", "waring", "info"
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $severity
+     * @return $this
+     */
+    public function setSeverity($severity)
+    {
+        if (in_array($severity, ['fatal', 'error', 'warning', 'info'])) {
+            $this->severity = $severity;
+        }
+        return $this;
+    }
+
+    /**
+     * Retrieve severity of exception
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getSeverity()
+    {
+        return $this->severity;
+    }
+
+    /**
      * Set a message bag of errors
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
      * @param  \Illuminate\Support\MessageBag $errors
-     * @return \Nodes\Exception\Exception
+     * @return $this
      */
     public function setErrors(MessageBag $errors)
     {
         $this->errors = $errors;
+
+        // Add status message to meta array
+        if (!$errors->isEmpty()) {
+            $this->addMeta(['errors' => $errors->all()]);
+        }
+
         return $this;
     }
 
