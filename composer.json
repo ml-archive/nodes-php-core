@@ -15,15 +15,10 @@
             "name": "Morten Rugaard",
             "email": "moru@nodes.dk",
             "role": "Developer"
-        },
-        {
-            "name": "Casper Rasmussen",
-            "email": "cr@nodes.dk",
-            "role": "CTO"
         }
     ],
     "require": {
-        "php": ">=5.4.0"
+        "laravel/framework": "5.1.*||5.2.*"
     },
     "autoload": {
         "psr-4": {
@@ -35,6 +30,5 @@
             "src/Support/Helpers/Request.php",
             "src/Support/Helpers/String.php"
         ]
-    },
-    "minimum-stability": "stable"
+    }
 }
