@@ -1,7 +1,5 @@
 <?php
-namespace Nodes\Core;
-
-use Nodes\AbstractServiceProvider;
+namespace Nodes;
 
 /**
  * Class ServiceProvider
@@ -21,5 +19,7 @@ class ServiceProvider extends AbstractServiceProvider
     public function register()
     {
         parent::register();
+
+        $this->app->register(\Nodes\Console\ConsoleServiceProvider::class);
     }
 }
