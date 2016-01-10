@@ -20,6 +20,6 @@ class ServiceProvider extends AbstractServiceProvider
     {
         parent::register();
 
-        $this->app->register(\Nodes\Console\ConsoleServiceProvider::class);
+        //$this->app->register(\Nodes\Console\ConsoleServiceProvider::class);
     }
 }
