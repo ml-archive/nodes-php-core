@@ -9,6 +9,15 @@ namespace Nodes;
 class ServiceProvider extends AbstractServiceProvider
 {
     /**
+     * Register Artisan commands
+     *
+     * @var array
+     */
+    protected $commands = [
+        \Nodes\Console\Commands\InstallPackage::class
+    ];
+
+    /**
      * Register the service provider
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -20,6 +29,7 @@ class ServiceProvider extends AbstractServiceProvider
     {
         parent::register();
 
-        //$this->app->register(\Nodes\Console\ConsoleServiceProvider::class);
+        // Register Artisan commands
+        $this->commands($this->commands);
     }
 }

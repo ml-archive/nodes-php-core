@@ -48,7 +48,7 @@ class InstallPackage extends Command
         }
 
         // Make user confirm installation of package
-        if (!$this->confirm(sprintf('Do you wish to install package [%s]?', $package))) {
+        if (!$this->confirm(sprintf('Do you wish to install package [%s]?', $package), true)) {
             $this->comment('See README.md for instructions to manually install package.');
             return;
         }
@@ -60,10 +60,19 @@ class InstallPackage extends Command
         $serviceProviderFileName = $this->option('file') ?: 'ServiceProvider.php';
 
         // Install service provider for package
-        nodes_install_service_provider($packageName, $serviceProviderFileName);
+        $serviceProvider = nodes_install_service_provider($vendor, $packageName, $serviceProviderFileName);
 
         // Successfully installed package
-        $this->info(sprintf('Package [%s] was successfully installed.', $packageName));
+        $this->info(sprintf('Service Provider for package [%s] was successfully installed.', $packageName));
+
+        // Ask a series of after installation questions
+        // such as to copy config files, views etc.
+        app($serviceProvider)->install();
+    }
+
+    protected function installPackageAssets()
+    {
+
     }
 
     /**

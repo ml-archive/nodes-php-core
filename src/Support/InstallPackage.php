@@ -52,19 +52,67 @@ class InstallPackage
     }
 
     /**
+     * Add Nodes Service provider if missing
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return boolean
+     */
+    public function addNodesServiceProvider()
+    {
+        // Load Laravel's "app config" into an array
+        $config = file(config_path('app.php'));
+
+        // Locate "Nodes Core Service Provider" position in providers array
+        $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config));
+        if (!empty($locateNodesCoreProviderPosition[0])) {
+            return true;
+        }
+
+        $locateNodesCoreProviderArrayPosition = array_keys(preg_grep("|'providers' =>|", $config));
+        for($i = $locateNodesCoreProviderArrayPosition[0]; $i < count($config); $i++) {
+            // Trim current config line
+            $value = trim($config[$i]);
+
+            // If line is not the end of the "providers" array
+            // continue onwards to next line
+            if ($value != '],') {
+                continue;
+            }
+
+            // Generate service provider content
+            $serviceProviderSnippet  = '' . "\n";
+            $serviceProviderSnippet .= str_repeat("\t", 2) . '/**' . "\n";
+            $serviceProviderSnippet .= str_repeat("\t", 2) . ' * Nodes Service Providers' . "\n";
+            $serviceProviderSnippet .= str_repeat("\t", 2) . ' */' . "\n";
+            $serviceProviderSnippet .= str_repeat("\t", 2) . 'Nodes\ServiceProvider::class,' . "\n";
+
+            // Add service provider snippet to config array
+            array_splice($config, $i, 0, $serviceProviderSnippet);
+            break;
+        }
+
+        // Update service provider config
+        file_put_contents(config_path('app.php'), implode('', $config));
+
+        return true;
+    }
+
+    /**
      * Install package's service provider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
      * @param  string  $serviceProviderFilename
-     * @return void
+     * @return string  Returns namespace of service provider
      * @throws \Nodes\Exceptions\InstallPackageException
      */
     public function installServiceProvider($serviceProviderFilename = 'ServiceProvider.php')
     {
         // Validate required package information
-        if (empty($this->vendor) || empty($this->package)) {
+        if (empty($this->vendor) || empty($this->packageName)) {
             throw new InstallPackageException(sprintf('Vendor [%s] or Package Name [%s] is not set.', $this->vendor, $this->packageName), 400);
         }
 
@@ -79,6 +127,9 @@ class InstallPackage
 
         // Generate path to service provider file
         $serviceProviderFilenamePath = sprintf('%s/src/%s', $vendorPath, $serviceProviderFilename);
+        if (!file_exists($serviceProviderFilenamePath)) {
+            throw new InstallPackageException(sprintf('[%s] was not be found in the package folder [%s].', $serviceProviderFilename, $vendorPath), 400);
+        }
 
         // Look for service provider file in Composers class map
         //
@@ -86,7 +137,7 @@ class InstallPackage
         // registered with Composers autoloader
         $this->serviceProvider = $serviceProvider = array_search($serviceProviderFilenamePath, $this->composerClassMap);
         if (!$serviceProvider) {
-            throw new InstallPackageException(sprintf('Service Provider [%s] for package [%s] was not found in Composers class map.', $serviceProviderFilename, $this->packageName), 400);
+            throw new InstallPackageException(sprintf('Service Provider [%s] for package [%s] was not found in Composers class map.', $serviceProvider, sprintf('%s/%s', $this->vendor, $this->packageName)), 400);
         }
 
         // Make sure to load service provider
@@ -99,7 +150,7 @@ class InstallPackage
         $config = file(config_path('app.php'));
 
         // Locate "Nodes Core Service Provider" position in providers array
-        $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\Core\\\\ServiceProvider::class|', $config))[0];
+        $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config))[0];
 
         for($i = $locateNodesCoreProviderPosition+1; $i < count($config); $i++) {
             // Get value of next item in providers array
@@ -120,6 +171,8 @@ class InstallPackage
 
         // Update existing config
         file_put_contents(config_path('app.php'), implode('', $config));
+
+        return $serviceProvider;
     }
 
     /**
