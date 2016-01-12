@@ -8,16 +8,19 @@ if (!function_exists('nodes_install_service_provider')) {
      * @param  string $vendorName
      * @param  string $packageName
      * @param  string $serviceProviderFilename
-     * @return void
+     * @return string
      */
     function nodes_install_service_provider($vendorName, $packageName, $serviceProviderFilename = 'ServiceProvider.php')
     {
         // Instantiate Install Package handler
         $installPackage = app(\Nodes\Support\InstallPackage::class);
 
+        // Optimize composer autoloader
+        exec('composer dump-autoload --optimize');
+
         // Install service provider for package
-        $installPackage->setVendorName($vendorName)
-                       ->setPackageName($packageName)
-                       ->installServiceProvider($serviceProviderFilename);
+        return $installPackage->setVendorName($vendorName)
+                              ->setPackageName($packageName)
+                              ->installServiceProvider($serviceProviderFilename);
     }
 }

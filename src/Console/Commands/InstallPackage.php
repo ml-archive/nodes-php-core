@@ -2,6 +2,7 @@
 namespace Nodes\Console\Commands;
 
 use Illuminate\Console\Command;
+use Nodes\AbstractServiceProvider as NodesAbstractServiceProvider;
 use Nodes\Exceptions\InstallNodesPackageException;
 use Nodes\Exceptions\InstallPackageException;
 
@@ -60,19 +61,21 @@ class InstallPackage extends Command
         $serviceProviderFileName = $this->option('file') ?: 'ServiceProvider.php';
 
         // Install service provider for package
-        $serviceProvider = nodes_install_service_provider($vendor, $packageName, $serviceProviderFileName);
+        $serviceProviderClass = nodes_install_service_provider($vendor, $packageName, $serviceProviderFileName);
+        if ($serviceProviderClass === true) {
+            $this->comment(sprintf('Package [%s] is already installed.', sprintf('%s/%s', $vendor, $packageName)));
+            return;
+        }
+
+        // Ask a series of installation questions
+        // such as to copy config files, views etc.
+        $serviceProvider = app($serviceProviderClass, [$this->getLaravel()]);
+        if ($serviceProvider instanceof NodesAbstractServiceProvider) {
+            $serviceProvider->setOutput($this->getOutput())->install();
+        }
 
         // Successfully installed package
-        $this->info(sprintf('Service Provider for package [%s] was successfully installed.', $packageName));
-
-        // Ask a series of after installation questions
-        // such as to copy config files, views etc.
-        app($serviceProvider)->install();
-    }
-
-    protected function installPackageAssets()
-    {
-
+        $this->info(sprintf('Service Provider for package <comment>[%s]</comment> was successfully installed.', sprintf('%s/%s', $vendor, $packageName)));
     }
 
     /**

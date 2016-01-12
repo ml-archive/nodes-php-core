@@ -106,7 +106,7 @@ class InstallPackage
      *
      * @access public
      * @param  string  $serviceProviderFilename
-     * @return string  Returns namespace of service provider
+     * @return string|boolean  Returns true if service provider is already installed
      * @throws \Nodes\Exceptions\InstallPackageException
      */
     public function installServiceProvider($serviceProviderFilename = 'ServiceProvider.php')
@@ -146,13 +146,23 @@ class InstallPackage
             require_once($serviceProviderFilename);
         }
 
-        // Load Laravel's "app config" into an array
+        // Load Laravel's app config into an array
         $config = file(config_path('app.php'));
 
-        // Locate "Nodes Core Service Provider" position in providers array
-        $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config))[0];
+        // Make sure package service provider isn't already installed
+        $checkIfServiceProviderIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $serviceProvider)), $config));
+        if (!empty($checkIfServiceProviderIsAlreadyInstalled[0])) {
+            return true;
+        }
 
-        for($i = $locateNodesCoreProviderPosition+1; $i < count($config); $i++) {
+        // Locate "Nodes Core Service Provider" position in providers array
+        $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config));
+        if (empty($locateNodesCoreProviderPosition[0])) {
+
+        }
+
+        // Add package service provider to Laravel's app config
+        for($i = $locateNodesCoreProviderPosition[0]+1; $i < count($config); $i++) {
             // Get value of next item in providers array
             $value = trim($config[$i]);
 
@@ -164,7 +174,7 @@ class InstallPackage
 
             // Insert service provider at current position
             array_splice($config, $i, 0, [
-                str_repeat("\t", 2) . sprintf('%s::class', $serviceProvider)
+                str_repeat("\t", 2) . sprintf('%s::class,', $serviceProvider) . "\n"
             ]);
             break;
         }

@@ -9,6 +9,13 @@ namespace Nodes;
 class ServiceProvider extends AbstractServiceProvider
 {
     /**
+     * Name of package
+     *
+     * @var string
+     */
+    protected $package = 'core';
+
+    /**
      * Register Artisan commands
      *
      * @var array
