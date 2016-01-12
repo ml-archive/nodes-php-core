@@ -89,9 +89,9 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Run install methods
         $this->installConfigs();
+        $this->installScaffolding();
         $this->installViews();
         $this->installAssets();
-        $this->installScaffolding();
         $this->installCustom();
     }
 

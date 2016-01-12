@@ -69,7 +69,7 @@ class InstallPackage extends Command
 
         // Ask a series of installation questions
         // such as to copy config files, views etc.
-        $serviceProvider = app($serviceProviderClass, [$this->getLaravel()]);
+        $serviceProvider = app($serviceProviderClass, [$this->getLaravel()])->setPackage($packageName);
         if ($serviceProvider instanceof NodesAbstractServiceProvider) {
             $serviceProvider->setOutput($this->getOutput())->install();
         }
