@@ -1,7 +1,7 @@
 <?php
 namespace Nodes;
 
-use Illuminate\Console\OutputStyle as IlluminateConsoleOutput;
+use Illuminate\Console\OutputStyle as IlluminateConsoleOutputStyle;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use League\Flysystem\Adapter\Local as LocalAdapter;
@@ -30,6 +30,20 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @var string|null
      */
     protected $package = null;
+
+    /**
+     * Facades to install
+     *
+     * @var array
+     */
+    protected $facades = [];
+
+    /**
+     * Artisan commands to register
+     *
+     * @var array
+     */
+    protected $commands = [];
 
     /**
      * Array of configs to copy
@@ -67,6 +81,33 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected $output;
 
     /**
+     * Register the service provider
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return void
+     */
+    public function register()
+    {
+        $this->registerCommands();
+    }
+
+    /**
+     * Register Artisan Commands
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return $this
+     */
+    public function registerCommands()
+    {
+        $this->commands($this->commands);
+        return $this;
+    }
+
+    /**
      * Install service provider
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -83,7 +124,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Make sure we have the Console Output style
         // before continuing with the install sequence
-        if (empty($this->output)) {
+        if (empty($this->getOutput())) {
             throw new InstallPackageException('Could not run install sequence. Reason: Missing Console Output reference.');
         }
 
@@ -96,16 +137,6 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Register the service provider
-     *
-     * @author Morten Rugaard <moru@nodes.dk>
-     *
-     * @access public
-     * @return void
-     */
-    public function register() {}
-
-    /**
      * Copy configs to application
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -116,10 +147,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected function installConfigs()
     {
         // Generate question
-        $question = sprintf('Do you wish to copy config files from the package [%s] to your project? Note: Existing files will be overwritten.', sprintf('%s/%s', $this->vendor, $this->package));
+        $question = sprintf('Copy config files from the package [%s] to your project? <comment>Note: Existing files will be overwritten.</comment>', sprintf('%s/%s', $this->vendor, $this->package));
 
         // Make user confirm copying of config files
-        if (empty($this->configs) || !$this->output->confirm($question, true)) {
+        if (empty($this->configs) || !$this->getOutput()->confirm($question, true)) {
             return;
         }
 
@@ -138,10 +169,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected function installViews()
     {
         // Generate question
-        $question = sprintf('Do you wish to copy view files from the package [%s] to your project? Note: Existing files will be overwritten.', sprintf('%s/%s', $this->vendor, $this->package));
+        $question = sprintf('Copy view files from the package [%s] to your project? <comment>Note: Existing files will be overwritten.</comment>', sprintf('%s/%s', $this->vendor, $this->package));
 
         // Make user confirm copying of view files
-        if (empty($this->views) || !$this->output->confirm($question, true)) {
+        if (empty($this->views) || !$this->getOutput()->confirm($question, true)) {
             return;
         }
 
@@ -160,10 +191,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected function installAssets()
     {
         // Generate question
-        $question = sprintf('Do you wish to copy assets files from the package [%s] to your project? Note: Existing files will be overwritten.', sprintf('%s/%s', $this->vendor, $this->package));
+        $question = sprintf('Copy assets files from the package [%s] to your project? <comment>Note: Existing files will be overwritten.</comment>', sprintf('%s/%s', $this->vendor, $this->package));
 
         // Make user confirm copying of assets files
-        if (empty($this->assets) || !$this->output->confirm($question, true)) {
+        if (empty($this->assets) || !$this->getOutput()->confirm($question, true)) {
             return;
         }
 
@@ -215,7 +246,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
             } elseif ($this->files->isDirectory($from)) {
                 $this->publishDirectory($from, $to);
             } else {
-                $this->output->error(sprintf('Could not locate path: <%s>', $from));
+                $this->getOutput()->error(sprintf('Could not locate path: <%s>', $from));
             }
         }
     }
@@ -243,7 +274,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         $this->files->copy($from, $to);
 
         // Output status message
-        $this->output->writeln(
+        $this->getOutput()->writeln(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
             'File', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
         );
@@ -275,7 +306,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         }
 
         // Output status message
-        $this->output->writeln(
+        $this->getOutput()->writeln(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
             'Directory', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
         );
@@ -342,19 +373,45 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Set console output style, which is used
-     * by our install method.
+     * Retrieve facades to install
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
      * @access public
-     * @param \Illuminate\Console\OutputStyle $output
+     * @return array
+     */
+    final public function getFacades()
+    {
+        return (array) $this->facades;
+    }
+
+    /**
+     * Set console output interface
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @final
+     * @access public
+     * @param  \Illuminate\Console\OutputStyle $output
      * @return $this
      */
-    final public function setOutput(IlluminateConsoleOutput $output)
+    final public function setOutput(IlluminateConsoleOutputStyle $output)
     {
         $this->output = $output;
         return $this;
+    }
+
+    /**
+     * Retrieve console output interface
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return \Illuminate\Console\OutputStyle
+     */
+    final public function getOutput()
+    {
+        return $this->output;
     }
 }

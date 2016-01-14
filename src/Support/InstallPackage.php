@@ -1,6 +1,7 @@
 <?php
 namespace Nodes\Support;
 
+use Illuminate\Console\OutputStyle as IlluminateConsoleOutputStyle;
 use Nodes\Exceptions\InstallPackageException;
 
 /**
@@ -37,6 +38,13 @@ class InstallPackage
      * @var string
      */
     protected $serviceProvider;
+
+    /**
+     * The output interface implementation
+     *
+     * @var \Symfony\Component\Console\Output\OutputInterface
+     */
+    protected $output;
 
     /**
      * InstallPackage constructor
@@ -155,24 +163,65 @@ class InstallPackage
             return true;
         }
 
-        // Locate "Nodes Core Service Provider" position in providers array
+        // Locate position of Nodes (Core) service provider in config file
         $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config));
         if (empty($locateNodesCoreProviderPosition[0])) {
+            // Nodes Core service provider is missing from config file.
+            // We'll start by adding that and then try again.
+            $this->addNodesServiceProvider();
 
+            // Reload config file
+            $config = file(config_path('app.php'));
+
+            // Lets' try and locate the position again.
+            $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config));
         }
+
+        // Service Provider namespace
+        $serviceProviderNamespace = explode('\\', sprintf('%s::class', $this->serviceProvider));
 
         // Add package service provider to Laravel's app config
         for($i = $locateNodesCoreProviderPosition[0]+1; $i < count($config); $i++) {
             // Get value of next item in providers array
             $value = trim($config[$i]);
 
-            // Check if we should insert the service provider
-            // at the current position. Else skip to next item.
-            if (!$this->shouldInsertHere($value)) {
-                continue;
+            // If we're on a line where there's already a service provider,
+            // we'll take the namespace and match it up against our own.
+            // If our service provider doesn't fit here, we'll move on to next line.
+            if (!empty($value) && $value != '],') {
+                // Current item namespace
+                $currentNamespace = explode('\\', $value);
+
+                // Comparison state
+                $shouldBeInsertedHere = false;
+
+                // Determine if current item's namespace, comes before or after
+                // our own service providers namespace, if sorted alphabetically
+                foreach ($currentNamespace as $key => $namespacePart) {
+                    // Compare current namespace parts
+                    $comparison = strnatcmp($namespacePart, $serviceProviderNamespace[$key]);
+
+                    // Namespace parts are identical
+                    // move on to the next part.
+                    if ($comparison == 0) {
+                        continue;
+                    }
+
+                    // Difference found
+                    $shouldBeInsertedHere = $comparison > 0 ? true : false;
+                    break;
+                }
+
+                // After comparing we can conclude our service provider
+                // should NOT be inserted at current line. And we're
+                // therefore moving on to next line.
+                if (!$shouldBeInsertedHere) {
+                    continue;
+                }
             }
 
-            // Insert service provider at current position
+            // Success!
+            // Insert service provider at current line
             array_splice($config, $i, 0, [
                 str_repeat("\t", 2) . sprintf('%s::class,', $serviceProvider) . "\n"
             ]);
@@ -186,48 +235,77 @@ class InstallPackage
     }
 
     /**
-     * Check if we should insert item at current position
+     * Install facades belonging to package
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @param  string $value
-     * @return boolean
+     * @param  array $facades
+     * @return boolean|null
      */
-    protected function shouldInsertHere($value)
+    public function installFacades($facades)
     {
-        // If value is either:
-        // Empty = We're on an empty line in the providers array
-        // "]," = We're at the last item of the providers array)
-        //
-        // Then we'll always want to insert item here.
-        if (empty($value) || $value == '],') {
-            return true;
+        if (empty($facades) || !is_array($facades)) {
+            return false;
         }
 
-        // Current item namespace
-        $itemNamespace = explode('\\', $value);
+        // Load Laravel's app config into an array
+        $config = file(config_path('app.php'));
 
-        // Service Provider namespace
-        $serviceProviderNamespace = explode('\\', sprintf('%s::class', $this->serviceProvider));
+        // Locate beginning of $aliases array
+        $locateAliasesArray = array_keys(preg_grep('|\'aliases\' => \[|', $config));
+        if (empty($locateAliasesArray[0])) {
+            return null;
+        }
 
-        // Determine if current item's namespace, comes before or after
-        // the service providers namespace, if sorted alphabetically
-        foreach ($itemNamespace as $key => $namespacePart) {
-            // Compare current namespace parts
-            $comparison = strnatcmp($namespacePart, $serviceProviderNamespace[$key]);
-
-            // Namespace parts are identical,
-            // move on to the next part.
-            if ($comparison == 0) {
+        foreach ($facades as $facadeName => $facadeNamespace) {
+            // If facade is already installed,
+            // we'll just skip it and move along.
+            $checkIfFacadesIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $facadeNamespace)), $config));
+            if (!empty($checkIfFacadesIsAlreadyInstalled[0])) {
                 continue;
             }
 
-            // Difference found
-            return $comparison > 0 ? true : false;
+            for ($i = $locateAliasesArray[0]+1; $i < count($config); $i++) {
+                // Get value of next line
+                $value = trim($config[$i]);
+
+                // If we're on an empty line, we'll continue to next one
+                //
+                // If we're on a line where there's already a facade,
+                // we'll take the facade and match it up against our
+                // current one. If our facade doesn't fit here,
+                // we'll continue on to next line.
+                if (empty($value)) {
+                    continue;
+                } elseif (!empty($value) && $value != '],') {
+                    // Retrieve current facade name from line
+                    $currentFacadeName = trim(explode('=>', $value)[0]);
+
+                    // Remove single quotes wrapping facade name
+                    $currentFacadeName = substr($currentFacadeName, 1, strlen($currentFacadeName)-1);
+
+                    // Compare the two facades names.
+                    // If current facade name comes before our own facade name
+                    // we'll move on to next line
+                    if (strnatcmp($currentFacadeName, $facadeName) != 1) {
+                        continue;
+                    }
+                }
+
+                // Success!
+                // We're inserting our facade at the current line.
+                array_splice($config, $i, 0, [
+                    str_repeat("\t", 2) . sprintf('\'%s\' => %s::class,', $facadeName, $facadeNamespace) . "\n"
+                ]);
+                break;
+            }
         }
 
-        return false;
+        // Update existing config
+        file_put_contents(config_path('app.php'), implode('', $config));
+
+        return true;
     }
 
     /**
@@ -258,5 +336,34 @@ class InstallPackage
     {
         $this->packageName = $packageName;
         return $this;
+    }
+
+    /**
+     * Set console output interface
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @final
+     * @access public
+     * @param  \Illuminate\Console\OutputStyle $output
+     * @return $this
+     */
+    public function setOutput(IlluminateConsoleOutputStyle $output)
+    {
+        $this->output = $output;
+        return $this;
+    }
+
+    /**
+     * Retrieve console output interface
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return \Illuminate\Console\OutputStyle
+     */
+    public function getOutput()
+    {
+        return $this->output;
     }
 }

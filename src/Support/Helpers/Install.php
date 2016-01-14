@@ -1,7 +1,7 @@
 <?php
 if (!function_exists('nodes_install_service_provider')) {
     /**
-     * Install service provider for a Nodes Package
+     * Install service provider for a Nodes package
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
@@ -15,12 +15,33 @@ if (!function_exists('nodes_install_service_provider')) {
         // Instantiate Install Package handler
         $installPackage = app(\Nodes\Support\InstallPackage::class);
 
-        // Optimize composer autoloader
-        exec('composer dump-autoload --optimize');
-
         // Install service provider for package
         return $installPackage->setVendorName($vendorName)
                               ->setPackageName($packageName)
                               ->installServiceProvider($serviceProviderFilename);
+    }
+}
+
+if (!function_exists('nodes_install_facades')) {
+    /**
+     * Install facades used by a Nodes package
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @param  string                         $vendorName
+     * @param  string                         $packageName
+     * @param  \Nodes\AbstractServiceProvider $serviceProvider
+     * @return boolean
+     */
+    function nodes_install_facades($vendorName, $packageName, \Nodes\AbstractServiceProvider $serviceProvider)
+    {
+        // Instantiate Install Package handler
+        $installPackage = app(\Nodes\Support\InstallPackage::class);
+
+        // Install service provider for package
+        return $installPackage->setOutput($serviceProvider->getOutput())
+                              ->setVendorName($vendorName)
+                              ->setPackageName($packageName)
+                              ->installFacades($serviceProvider->getFacades());
     }
 }

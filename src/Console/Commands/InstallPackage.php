@@ -49,8 +49,8 @@ class InstallPackage extends Command
         }
 
         // Make user confirm installation of package
-        if (!$this->confirm(sprintf('Do you wish to install package [%s]?', $package), true)) {
-            $this->comment('See README.md for instructions to manually install package.');
+        if (!$this->confirm(sprintf('Do you wish to install package [%s] into your application?', $package), true)) {
+            $this->output->block(sprintf('See README.md for instructions to manually install package [%s].', $package), 'TIP!', 'fg=white;bg=black', ' ', true);
             return;
         }
 
@@ -63,15 +63,24 @@ class InstallPackage extends Command
         // Install service provider for package
         $serviceProviderClass = nodes_install_service_provider($vendor, $packageName, $serviceProviderFileName);
         if ($serviceProviderClass === true) {
-            $this->comment(sprintf('Package [%s] is already installed.', sprintf('%s/%s', $vendor, $packageName)));
+            $this->warn(sprintf('Package [%s] is already installed.', sprintf('%s/%s', $vendor, $packageName)));
             return;
         }
 
         // Ask a series of installation questions
         // such as to copy config files, views etc.
-        $serviceProvider = app($serviceProviderClass, [$this->getLaravel()])->setPackage($packageName);
+        $serviceProvider = app($serviceProviderClass, [$this->getLaravel()]);
         if ($serviceProvider instanceof NodesAbstractServiceProvider) {
-            $serviceProvider->setOutput($this->getOutput())->install();
+            // Set Console Outputter
+            $serviceProvider->setOutput($this->getOutput());
+
+            // Install package facades
+            if (is_null(nodes_install_facades($vendor, $packageName, $serviceProvider))) {
+                $this->error('Could not localte aliases array in [config/app.php]');
+            }
+
+            // Run package install sequence
+            $serviceProvider->install();
         }
 
         // Successfully installed package
