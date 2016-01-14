@@ -48,22 +48,27 @@ class InstallPackage extends Command
             throw new InstallPackageException(sprintf('Invalid package name [%s]', $package), 400);
         }
 
-        // Make user confirm installation of package
-        if (!$this->confirm(sprintf('Do you wish to install package [%s] into your application?', $package), true)) {
-            $this->output->block(sprintf('See README.md for instructions to manually install package [%s].', $package), 'TIP!', 'fg=white;bg=black', ' ', true);
-            return;
-        }
-
         // Split package into vendor name and package name
         list($vendor, $packageName) = explode('/', $package);
 
         // Service Provider filename
         $serviceProviderFileName = $this->option('file') ?: 'ServiceProvider.php';
 
+        // Check if package is already installed.
+        // If it is, we'll abort and do nothing.
+        if (nodes_is_package_installed($vendor, $packageName, $serviceProviderFileName)) {
+            return;
+        }
+
+        // Make user confirm installation of package
+        if (!$this->confirm(sprintf('Do you wish to install package [%s] into your application?', $package), true)) {
+            $this->output->block(sprintf('See README.md for instructions to manually install package [%s].', $package), 'TIP!', 'fg=white;bg=black', ' ', true);
+            return;
+        }
+
         // Install service provider for package
         $serviceProviderClass = nodes_install_service_provider($vendor, $packageName, $serviceProviderFileName);
         if ($serviceProviderClass === true) {
-            $this->warn(sprintf('Package [%s] is already installed.', sprintf('%s/%s', $vendor, $packageName)));
             return;
         }
 

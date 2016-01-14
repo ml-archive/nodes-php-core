@@ -45,3 +45,26 @@ if (!function_exists('nodes_install_facades')) {
                               ->installFacades($serviceProvider->getFacades());
     }
 }
+
+if (!function_exists('nodes_is_package_installed')) {
+    /**
+     * Check if a Nodes package is already installed
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @param  string $vendorName
+     * @param  string $packageName
+     * @param  string $serviceProviderFilename
+     * @return boolean
+     */
+    function nodes_is_package_installed($vendorName, $packageName, $serviceProviderFilename = 'ServiceProvider.php')
+    {
+        // Instantiate Install Package handler
+        $installPackage = app(\Nodes\Support\InstallPackage::class);
+
+        // Check if package is already installed
+        return $installPackage->setVendorName($vendorName)
+                              ->setPackageName($packageName)
+                              ->isPackageInstalled($serviceProviderFilename);
+    }
+}

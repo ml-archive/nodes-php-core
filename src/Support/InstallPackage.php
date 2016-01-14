@@ -25,12 +25,7 @@ class InstallPackage
      */
     protected $packageName;
 
-    /**
-     * Composer's class map
-     *
-     * @var array
-     */
-    protected $composerClassMap;
+    protected $packagePath;
 
     /**
      * Service provider class name
@@ -38,6 +33,15 @@ class InstallPackage
      * @var string
      */
     protected $serviceProvider;
+
+    protected $serviceProviderFilePath;
+
+    /**
+     * Composer's class map
+     *
+     * @var array
+     */
+    protected $composerClassMap;
 
     /**
      * The output interface implementation
@@ -57,6 +61,86 @@ class InstallPackage
     {
         // Composers class map
         $this->composerClassMap = require(base_path('vendor/composer/autoload_classmap.php'));
+    }
+
+    /**
+     * Prepare package by locating package path
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return $this
+     * @throws \Nodes\Exceptions\InstallPackageException
+     */
+    protected function preparePackage()
+    {
+        // Validate required package information
+        if (empty($this->vendor) || empty($this->packageName)) {
+            throw new InstallPackageException(sprintf('Vendor [%s] or Package Name [%s] is not set.', $this->vendor, $this->packageName), 400);
+        }
+
+        // Generate path to package
+        // $vendorPath = base_path(sprintf('vendor/%s/%s', $name[0], $name[1]));
+        $this->packagePath = $packagePath = base_path(sprintf('%s/%s', $this->vendor, $this->packageName));
+
+        // Check if package exists in the vendor folder
+        if (!file_exists($packagePath)) {
+            throw new InstallPackageException(sprintf('[%s] was not be found in the vendor folder [%s].', $this->packageName, base_path('vendor/')), 400);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Prepare package to work on/with the service provider
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @param  string $serviceProviderFilename
+     * @return $this
+     * @throws \Nodes\Exceptions\InstallPackageException
+     */
+    protected function prepareServiceProvider($serviceProviderFilename)
+    {
+        // Generate path to service provider file
+        $this->serviceProviderFilePath = $serviceProviderFilePath = sprintf('%s/src/%s', $this->packagePath, $serviceProviderFilename);
+        if (!file_exists($serviceProviderFilePath)) {
+            throw new InstallPackageException(sprintf('[%s] was not be found in the package folder [%s].', $serviceProviderFilename, $this->packagePath), 400);
+        }
+
+        $this->serviceProvider = $serviceProvider = array_search($serviceProviderFilePath, $this->composerClassMap);
+        if (!$serviceProvider) {
+            throw new InstallPackageException(sprintf('Service Provider [%s] for package [%s] was not found in Composers class map.', $serviceProvider, sprintf('%s/%s', $this->vendor, $this->packageName)), 400);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Check if package is installed
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $serviceProviderFilename
+     * @return boolean
+     * @throws \Nodes\Exceptions\InstallPackageException
+     */
+    public function isPackageInstalled($serviceProviderFilename = 'ServiceProvider.php')
+    {
+        // Prepare package and service provider
+        $this->preparePackage()->prepareServiceProvider($serviceProviderFilename);
+
+        // Load Laravel's "app config" into an array
+        $config = file(config_path('app.php'));
+
+        // Look for package service provider
+        $checkIfServiceProviderIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $this->serviceProvider)), $config));
+
+        // If service provider is found,
+        // we can conclude the package is already installed
+        return !empty($checkIfServiceProviderIsAlreadyInstalled[0]) ? true : false;
     }
 
     /**
@@ -119,46 +203,22 @@ class InstallPackage
      */
     public function installServiceProvider($serviceProviderFilename = 'ServiceProvider.php')
     {
-        // Validate required package information
-        if (empty($this->vendor) || empty($this->packageName)) {
-            throw new InstallPackageException(sprintf('Vendor [%s] or Package Name [%s] is not set.', $this->vendor, $this->packageName), 400);
-        }
-
-        // Generate path to package
-        // $vendorPath = base_path(sprintf('vendor/%s/%s', $name[0], $name[1]));
-        $vendorPath = base_path(sprintf('%s/%s', $this->vendor, $this->packageName));
-
-        // Check if package exists in the vendor folder
-        if (!file_exists($vendorPath)) {
-            throw new InstallPackageException(sprintf('[%s] was not be found in the vendor folder [%s].', $this->packageName, base_path('vendor/')), 400);
-        }
-
-        // Generate path to service provider file
-        $serviceProviderFilenamePath = sprintf('%s/src/%s', $vendorPath, $serviceProviderFilename);
-        if (!file_exists($serviceProviderFilenamePath)) {
-            throw new InstallPackageException(sprintf('[%s] was not be found in the package folder [%s].', $serviceProviderFilename, $vendorPath), 400);
-        }
-
-        // Look for service provider file in Composers class map
-        //
-        // If not found, it means the package hasn't been properly
-        // registered with Composers autoloader
-        $this->serviceProvider = $serviceProvider = array_search($serviceProviderFilenamePath, $this->composerClassMap);
-        if (!$serviceProvider) {
-            throw new InstallPackageException(sprintf('Service Provider [%s] for package [%s] was not found in Composers class map.', $serviceProvider, sprintf('%s/%s', $this->vendor, $this->packageName)), 400);
+        // Check if service provider is already installed
+        if ($this->isPackageInstalled($serviceProviderFilename)) {
+            return true;
         }
 
         // Make sure to load service provider
         // if it for some reason isn't already
-        if (!class_exists($serviceProvider)) {
-            require_once($serviceProviderFilename);
+        if (!class_exists($this->serviceProvider)) {
+            require_once($this->serviceProviderFilePath);
         }
 
         // Load Laravel's app config into an array
         $config = file(config_path('app.php'));
 
         // Make sure package service provider isn't already installed
-        $checkIfServiceProviderIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $serviceProvider)), $config));
+        $checkIfServiceProviderIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $this->serviceProvider)), $config));
         if (!empty($checkIfServiceProviderIsAlreadyInstalled[0])) {
             return true;
         }
@@ -223,7 +283,7 @@ class InstallPackage
             // Success!
             // Insert service provider at current line
             array_splice($config, $i, 0, [
-                str_repeat("\t", 2) . sprintf('%s::class,', $serviceProvider) . "\n"
+                str_repeat("\t", 2) . sprintf('%s::class,', $this->serviceProvider) . "\n"
             ]);
             break;
         }
@@ -231,7 +291,7 @@ class InstallPackage
         // Update existing config
         file_put_contents(config_path('app.php'), implode('', $config));
 
-        return $serviceProvider;
+        return $this->serviceProvider;
     }
 
     /**
@@ -245,6 +305,7 @@ class InstallPackage
      */
     public function installFacades($facades)
     {
+        // Validate received data
         if (empty($facades) || !is_array($facades)) {
             return false;
         }
