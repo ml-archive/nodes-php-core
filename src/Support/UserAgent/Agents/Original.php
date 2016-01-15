@@ -305,7 +305,7 @@ class Original
      */
     public function getPlatform()
     {
-        return $this->getPlatform;
+        return $this->platform;
     }
 
     /**
