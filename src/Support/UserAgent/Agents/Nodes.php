@@ -275,4 +275,25 @@ class Nodes
     {
         return $this->device;
     }
+
+    /**
+     * toArray
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'userAgent' => $this->userAgent,
+            'version' => $this->version,
+            'majorVersion' => $this->majorVersion,
+            'minorVersion' => $this->minorVersion,
+            'patchVersion' => $this->patchVersion,
+            'debug' => $this->debug,
+            'platform' => $this->platform,
+            'device' => $this->device
+        ];
+    }
 }
