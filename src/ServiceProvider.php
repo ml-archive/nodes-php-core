@@ -28,6 +28,15 @@ class ServiceProvider extends AbstractServiceProvider
     ];
 
     /**
+     * Facades to install
+     *
+     * @var array
+     */
+    protected $facades = [
+        'NodesUserAgent' => \Nodes\Support\Facades\UserAgent::class
+    ];
+
+    /**
      * Register the service provider
      *
      * @author Morten Rugaard <moru@nodes.dk>
