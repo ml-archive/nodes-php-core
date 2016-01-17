@@ -9,7 +9,7 @@ if (!function_exists('nodes_user_agent')) {
      */
     function nodes_user_agent()
     {
-        return app('nodes.useragent')->getNodesUserAgent();
+        return \NodesUserAgent::nodes();
     }
 }
 
@@ -23,6 +23,6 @@ if (!function_exists('user_agent')) {
      */
     function user_agent()
     {
-        return app('nodes.useragent')->getOriginalUserAgent();
+        return \NodesUserAgent::original();
     }
 }
