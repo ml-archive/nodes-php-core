@@ -1,7 +1,7 @@
 <?php
 namespace Nodes\Support;
 
-use Illuminate\Console\OutputStyle as IlluminateConsoleOutputStyle;
+use Illuminate\Console\Command as IlluminateConsoleCommand;
 use Nodes\Exceptions\InstallPackageException;
 
 /**
@@ -25,6 +25,11 @@ class InstallPackage
      */
     protected $packageName;
 
+    /**
+     * Path to package
+     *
+     * @var string
+     */
     protected $packagePath;
 
     /**
@@ -34,6 +39,11 @@ class InstallPackage
      */
     protected $serviceProvider;
 
+    /**
+     * Path of service provider file
+     *
+     * @var string
+     */
     protected $serviceProviderFilePath;
 
     /**
@@ -44,11 +54,11 @@ class InstallPackage
     protected $composerClassMap;
 
     /**
-     * The output interface implementation
+     * Installer instance
      *
-     * @var \Symfony\Component\Console\Output\OutputInterface
+     * @var \Illuminate\Console\Command
      */
-    protected $output;
+    protected $installer;
 
     /**
      * InstallPackage constructor
@@ -400,31 +410,32 @@ class InstallPackage
     }
 
     /**
-     * Set console output interface
+     * Set installer instance
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
      * @access public
-     * @param  \Illuminate\Console\OutputStyle $output
+     * @param  \Illuminate\Console\Command $installer
      * @return $this
-     */
-    public function setOutput(IlluminateConsoleOutputStyle $output)
+     *
+    public function setInstaller(IlluminateConsoleCommand $installer)
     {
-        $this->output = $output;
+        $this->installer = $installer;
         return $this;
     }
 
     /**
-     * Retrieve console output interface
+     * Retrieve installer instance
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @return \Illuminate\Console\OutputStyle
-     */
-    public function getOutput()
+     * @return \Illuminate\Console\Command
+     *
+    public function getInstaller()
     {
-        return $this->output;
+        return $this->installer;
     }
+     */
 }

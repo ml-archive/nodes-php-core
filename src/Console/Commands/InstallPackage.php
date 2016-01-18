@@ -61,7 +61,7 @@ class InstallPackage extends Command
         }
 
         // Make user confirm installation of package
-        if (!$this->confirm(sprintf('Do you wish to install package [%s] into your application?', $package), true)) {
+        if (!$this->confirm(sprintf('Do you wish to install package <comment>[%s]</comment> into your application?', $package), true)) {
             $this->output->block(sprintf('See README.md for instructions to manually install package [%s].', $package), 'TIP!', 'fg=white;bg=black', ' ', true);
             return;
         }
@@ -77,7 +77,7 @@ class InstallPackage extends Command
         $serviceProvider = app($serviceProviderClass, [$this->getLaravel()]);
         if ($serviceProvider instanceof NodesAbstractServiceProvider) {
             // Set Console Outputter
-            $serviceProvider->setOutput($this->getOutput());
+            $serviceProvider->setInstaller($this);
 
             // Install package facades
             if (is_null(nodes_install_facades($vendor, $packageName, $serviceProvider))) {

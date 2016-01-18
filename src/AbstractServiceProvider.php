@@ -1,7 +1,8 @@
 <?php
 namespace Nodes;
 
-use Illuminate\Console\OutputStyle as IlluminateConsoleOutputStyle;
+use Exception;
+use Illuminate\Console\Command as IlluminateConsoleCommand;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use League\Flysystem\Adapter\Local as LocalAdapter;
@@ -67,6 +68,20 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected $assets = [];
 
     /**
+     * Array of migrations to copy
+     *
+     * @var array
+     */
+    protected $migrations = [];
+
+    /**
+     * Array of seeders to copy
+     *
+     * @var array
+     */
+    protected $seeders = [];
+
+    /**
      * The filesystem instance
      *
      * @var \Illuminate\Filesystem\Filesystem
@@ -74,11 +89,11 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected $files;
 
     /**
-     * The output interface implementation
+     * Install package instance
      *
-     * @var \Illuminate\Console\OutputStyle
+     * @var \Illuminate\Console\Command
      */
-    protected $output;
+    protected $installer;
 
     /**
      * Register the service provider
@@ -124,16 +139,19 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Make sure we have the Console Output style
         // before continuing with the install sequence
-        if (empty($this->getOutput())) {
+        if (empty($this->getInstaller())) {
             throw new InstallPackageException('Could not run install sequence. Reason: Missing Console Output reference.');
         }
 
         // Run install methods
+        $this->prepareInstall();
         $this->installConfigs();
         $this->installScaffolding();
         $this->installViews();
         $this->installAssets();
         $this->installCustom();
+        $this->installDatabase();
+        $this->finishInstall();
     }
 
     /**
@@ -146,11 +164,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      */
     protected function installConfigs()
     {
-        // Generate question
-        $question = sprintf('Copy config files from the package [%s] to your project? <comment>Note: Existing files will be overwritten.</comment>', sprintf('%s/%s', $this->vendor, $this->package));
-
-        // Make user confirm copying of config files
-        if (empty($this->configs) || !$this->getOutput()->confirm($question, true)) {
+        if (empty($this->configs)) {
             return;
         }
 
@@ -168,11 +182,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      */
     protected function installViews()
     {
-        // Generate question
-        $question = sprintf('Copy view files from the package [%s] to your project? <comment>Note: Existing files will be overwritten.</comment>', sprintf('%s/%s', $this->vendor, $this->package));
-
-        // Make user confirm copying of view files
-        if (empty($this->views) || !$this->getOutput()->confirm($question, true)) {
+        if (empty($this->views)) {
             return;
         }
 
@@ -190,16 +200,63 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      */
     protected function installAssets()
     {
-        // Generate question
-        $question = sprintf('Copy assets files from the package [%s] to your project? <comment>Note: Existing files will be overwritten.</comment>', sprintf('%s/%s', $this->vendor, $this->package));
-
-        // Make user confirm copying of assets files
-        if (empty($this->assets) || !$this->getOutput()->confirm($question, true)) {
+        if (empty($this->assets)) {
             return;
         }
 
         // Copy assets files to application
         $this->copyFilesAndDirectories($this->assets);
+    }
+
+    /**
+     * Install database migrations and seeders
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return void
+     */
+    protected function installDatabase()
+    {
+        $this->installDatabaseMigrations();
+        $this->installDatabaseSeeders();
+        $this->runDatabaseMigrationsAndSeeders();
+    }
+
+    /**
+     * Install database migration files
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return void
+     */
+    protected function installDatabaseMigrations()
+    {
+        if (empty($this->migrations)) {
+            return;
+        }
+
+        // Copy migration files to application
+        $this->copyFilesAndDirectories($this->migrations);
+    }
+
+    /**
+     * Install database seeder files
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return void
+     */
+    protected function installDatabaseSeeders()
+    {
+        if (empty($this->seeders)) {
+            return;
+        }
+
+        // Copy seeder files to application
+        $this->copyFilesAndDirectories($this->seeders);
     }
 
     /**
@@ -225,20 +282,87 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected function installCustom() {}
 
     /**
+     * Prepare install
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return void
+     */
+    protected function prepareInstall() {}
+
+    /**
+     * Finish install
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return void
+     */
+    protected function finishInstall() {}
+
+    /**
+     * Run database migrations and seeders
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @return void
+     */
+    protected function runDatabaseMigrationsAndSeeders()
+    {
+        // Ask to migrate the database,
+        // if we've copied any migration files to the application.
+        if (!empty($this->migrations) && $this->getInstaller()->confirm('Do you wish to migrate your database?', true)) {
+            try {
+                $this->getInstaller()->call('migrate');
+            } catch (Exception $e) {
+                $this->getInstaller()->error(sprintf('Could not migrate your database. Reason: %s', $e->getMessage()));
+            }
+        }
+
+        // Before we ask user to seed the database
+        // we need to have look in the $seeders array
+        // to remove folders from the array
+        $seeders = [];
+        foreach ($this->seeders as $seeder) {
+            if (is_dir(base_path($seeder))) {
+                continue;
+            }
+            $seeders[] = $seeder;
+        }
+
+        // Ask to seed the database,
+        // if we've copied any migration files to the application.
+        if (!empty($seeders) && $this->getInstaller()->confirm('Do you wish to seed your database?', true)) {
+            passthru('composer dump-autoload --optimize');
+            foreach ($seeders as $seeder) {
+                try {
+                    $seederFilename = substr($seeder, strrpos($seeder, '/') + 1);
+                    $this->getInstaller()->call('db:seed', [
+                        '--class' => substr($seederFilename, 0, strrpos($seederFilename, '.'))
+                    ]);
+                } catch (Exception $e) {
+                    $this->getInstaller()->error(sprintf('Could not seed database. Reason: %s', $e->getMessage()));
+                }
+            }
+        }
+    }
+
+    /**
      * Copy files and/or directories to application
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access private
+     * @access protected
      * @param  array $data
      * @return void
      */
-    private function copyFilesAndDirectories(array $data)
+    protected function copyFilesAndDirectories(array $data)
     {
         foreach ($data as $from => $to) {
             // Prepare $from and $to paths
             $from = base_path(sprintf('%s/%s/%s', $this->vendor, $this->package, $from));
-            $to = config_path($to);
+            $to = base_path($to);
 
             // Copy files or directory to application
             if ($this->files->isFile($from)) {
@@ -246,7 +370,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
             } elseif ($this->files->isDirectory($from)) {
                 $this->publishDirectory($from, $to);
             } else {
-                $this->getOutput()->error(sprintf('Could not locate path: <%s>', $from));
+                $this->getInstaller()->error(sprintf('Could not locate path: <%s>', $from));
             }
         }
     }
@@ -274,7 +398,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         $this->files->copy($from, $to);
 
         // Output status message
-        $this->getOutput()->writeln(
+        $this->getInstaller()->line(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
             'File', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
         );
@@ -306,7 +430,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         }
 
         // Output status message
-        $this->getOutput()->writeln(
+        $this->getInstaller()->line(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
             'Directory', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
         );
@@ -387,31 +511,30 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Set console output interface
+     * Set installer instance
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @final
      * @access public
-     * @param  \Illuminate\Console\OutputStyle $output
+     * @param  \Illuminate\Console\Command $installer
      * @return $this
      */
-    final public function setOutput(IlluminateConsoleOutputStyle $output)
+    public function setInstaller(IlluminateConsoleCommand $installer)
     {
-        $this->output = $output;
+        $this->installer = $installer;
         return $this;
     }
 
     /**
-     * Retrieve console output interface
+     * Retrieve installer instance
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @return \Illuminate\Console\OutputStyle
+     * @return \Illuminate\Console\Command
      */
-    final public function getOutput()
+    public function getInstaller()
     {
-        return $this->output;
+        return $this->installer;
     }
 }

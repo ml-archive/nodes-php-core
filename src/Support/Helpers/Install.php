@@ -39,7 +39,7 @@ if (!function_exists('nodes_install_facades')) {
         $installPackage = app(\Nodes\Support\InstallPackage::class);
 
         // Install service provider for package
-        return $installPackage->setOutput($serviceProvider->getOutput())
+        return $installPackage//->setInstaller($serviceProvider->getInstaller())
                               ->setVendorName($vendorName)
                               ->setPackageName($packageName)
                               ->installFacades($serviceProvider->getFacades());
