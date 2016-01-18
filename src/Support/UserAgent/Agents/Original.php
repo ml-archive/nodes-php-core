@@ -372,4 +372,29 @@ class Original
     {
         return $this->isCrawler;
     }
+
+    /**
+     * toArray
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     *
+     * @return array
+     */
+    public function toArray() {
+        return [
+            'userAgent' => $this->userAgent,
+            'browser' => $this->browser,
+            'version' => $this->version,
+            'majorVersion' => $this->majorVersion,
+            'minorVersion' => $this->minorVersion,
+            'browserWithVersion' => $this->browserWithVersion,
+            'publisher' => $this->publisher,
+            'platform' => $this->platform,
+            'device' => $this->device,
+            'devicePointer' => $this->devicePointer,
+            'isMobile' => $this->isMobile,
+            'isTablet' => $this->isTablet(),
+            'isCrawler' => $this->isCrawler
+        ];
+    }
 }
