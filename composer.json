@@ -23,11 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-           "Nodes\\": "src"
+           "Nodes\\": "src/"
         },
         "files": [
             "src/Support/Helpers/Config.php",
             "src/Support/Helpers/Filesystem.php",
+            "src/Support/Helpers/Install.php",
             "src/Support/Helpers/Request.php",
             "src/Support/Helpers/String.php",
             "src/Support/Helpers/UserAgent.php"

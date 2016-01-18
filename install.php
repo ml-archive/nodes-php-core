@@ -18,9 +18,9 @@ list($package) = array_slice($argv, 1);
 | Load required files before bootstrapping application.
 |
 */
-require __DIR__ . '/../../bootstrap/autoload.php';
+require __DIR__ . '/../../../bootstrap/autoload.php';
 
-$app = require_once __DIR__ . '/../../bootstrap/app.php';
+$app = require_once __DIR__ . '/../../../bootstrap/app.php';
 
 /*
 |--------------------------------------------------------------------------
