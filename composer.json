@@ -18,6 +18,7 @@
         }
     ],
     "require": {
+        "composer/composer": "^1.0",
         "laravel/framework": "5.1.*||5.2.*",
         "garetjax/phpbrowscap": "^2.0"
     },
