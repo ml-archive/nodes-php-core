@@ -8,7 +8,7 @@ use Composer\Installer\PackageEvents as ComposerPackageEvents;
 use Composer\IO\IOInterface as ComposerIOContract;
 use Composer\Plugin\CommandEvent as ComposerPluginCommandEvent;
 use Composer\Plugin\PluginEvents as ComposerPluginEvents;
-use Composer\Plugin\PluginInterface as ComposerPluginContract;
+use Composer\Plugin\PluginInterface;
 use Composer\Plugin\PreFileDownloadEvent as ComposerPluginPreFileDownloadEvent;
 use Composer\Script\Event as ComposerScriptEvent;
 use Composer\Script\ScriptEvents as ComposerScriptEvents;
@@ -18,7 +18,7 @@ use Composer\Script\ScriptEvents as ComposerScriptEvents;
  *
  * @package Nodes\Support
  */
-class Composer implements ComposerPluginContract, ComposerEventSubscriberContract
+class Composer implements PluginInterface, ComposerEventSubscriberContract
 {
     /**
      * Composer instance
