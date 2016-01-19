@@ -86,12 +86,12 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
 
     public function onPreUpdateCmd(ComposerScriptEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getID() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPostUpdateCmd(ComposerScriptEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getID() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPrePackageUpdate(ComposerPackageEvent $event)
