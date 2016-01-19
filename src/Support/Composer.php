@@ -64,7 +64,6 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
         return [
             //ComposerPackageEvents::POST_PACKAGE_INSTALL => 'nodesInstallPackage'
             ComposerPluginEvents::COMMAND => 'onCommand',
-            ComposerPluginEvents::PRE_FILE_DOWNLOAD => 'onPreFileDownload',
             ComposerScriptEvents::PRE_UPDATE_CMD => 'onPreUpdateCmd',
             ComposerScriptEvents::POST_UPDATE_CMD => 'onPostUpdateCmd',
             ComposerPackageEvents::PRE_PACKAGE_UPDATE => 'onPrePackageUpdate',
@@ -77,11 +76,6 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     public function onCommand(ComposerPluginCommandEvent $event)
     {
         $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getCommandName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
-    }
-
-    public function onPreFileDownload(ComposerPluginPreFileDownloadEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getProcessedUrl() . ' / ' . implode(', ', $event->get()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPreUpdateCmd(ComposerScriptEvent $event)
