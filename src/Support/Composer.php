@@ -76,41 +76,41 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
 
     public function onCommand(ComposerPluginCommandEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getCommandName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getCommandName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPreFileDownload(ComposerPluginPreFileDownloadEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getProcessedUrl() . ' / ' . implode(', ', $event->get()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getProcessedUrl() . ' / ' . implode(', ', $event->get()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPreUpdateCmd(ComposerScriptEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getID() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getID() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPostUpdateCmd(ComposerScriptEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getID() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getID() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPrePackageUpdate(ComposerPackageEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPostPackageUpdate(ComposerPackageEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPrePackageInstall(ComposerPackageEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 
     public function onPostPackageInstall(ComposerPackageEvent $event)
     {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . $event->getFlags());
+        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 }
