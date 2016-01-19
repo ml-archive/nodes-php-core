@@ -10,6 +10,7 @@
     ],
     "license": "MIT",
     "homepage": "http://nodesagency.com",
+    "type": "composer-plugin",
     "authors": [
         {
             "name": "Morten Rugaard",
@@ -18,7 +19,6 @@
         }
     ],
     "require": {
-        "composer/composer": "^1.0",
         "laravel/framework": "5.1.*||5.2.*",
         "garetjax/phpbrowscap": "^2.0"
     },
@@ -33,5 +33,8 @@
             "src/Support/Helpers/String.php",
             "src/Support/Helpers/UserAgent.php"
         ]
+    },
+    "extra": {
+        "class": "Nodes\\Support\\Composer"
     }
 }
