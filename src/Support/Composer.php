@@ -139,6 +139,8 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
             $this->runInstallPackageCommand($package);
         }
 
+        $this->getArtisan()->terminate(null, null);
+
         // Stop propagation
         $event->stopPropagation();
     }
