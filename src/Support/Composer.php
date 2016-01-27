@@ -6,10 +6,7 @@ use Composer\EventDispatcher\EventSubscriberInterface as ComposerEventSubscriber
 use Composer\Installer\PackageEvent as ComposerPackageEvent;
 use Composer\Installer\PackageEvents as ComposerPackageEvents;
 use Composer\IO\IOInterface as ComposerIOContract;
-use Composer\Plugin\CommandEvent as ComposerPluginCommandEvent;
-use Composer\Plugin\PluginEvents as ComposerPluginEvents;
 use Composer\Plugin\PluginInterface;
-use Composer\Plugin\PreFileDownloadEvent as ComposerPluginPreFileDownloadEvent;
 use Composer\Script\Event as ComposerScriptEvent;
 use Composer\Script\ScriptEvents as ComposerScriptEvents;
 
@@ -28,6 +25,13 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     protected $composer;
 
     /**
+     * Composer config
+     *
+     * @var array
+     */
+    protected $config;
+
+    /**
      * Composer IO instance
      *
      * @var \Composer\IO\IOInterface
@@ -35,12 +39,33 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     protected $io;
 
     /**
+     * Packages to install
+     *
+     * @var array
+     */
+    protected $packages = [];
+
+    /**
+     * Laravel application
+     *
+     * @var \Illuminate\Foundation\Application
+     */
+    protected $laravel;
+
+    /**
+     * Artisan application
+     *
+     * @var \Illuminate\Foundation\Console\Kernel
+     */
+    protected $artisan;
+
+    /**
      * Activate is called after the plugin is loaded
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @param  \Composer\Composer  $composer
+     * @param  \Composer\Composer       $composer
      * @param  \Composer\IO\IOInterface $io
      * @return void
      */
@@ -48,6 +73,145 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     {
         $this->composer = $composer;
         $this->io = $io;
+    }
+
+    /**
+     * Bootstrap Laravel application
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return \Illuminate\Foundation\Application
+     */
+    protected function bootstrapLaravel()
+    {
+        // Autoload required bootstrap files
+        require __DIR__ . '/../../../../../bootstrap/autoload.php';
+
+        // Bootstrap Laravel application
+        $this->laravel = $laravel = require_once __DIR__ . '/../../../../../bootstrap/app.php';
+
+        // Bootstrap Artisan application
+        $this->artisan = $laravel->make(\Illuminate\Contracts\Console\Kernel::class);
+
+        return $laravel;
+    }
+
+    /**
+     * Add package name to array of packages to install
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  \Composer\Installer\PackageEvent $event
+     * @return void
+     */
+    public function addPackage(ComposerPackageEvent $event)
+    {
+        // Retrieve package
+        $package = $event->getOperation()->getPackage();
+
+        // Retrieve install path of package
+        $packagePath = $event->getComposer()->getInstallationManager()->getInstallPath($package) . '/';
+
+        // If package contains a service provider,
+        // add package to array of packages to install
+        if ($this->packageHasServiceProvider($packagePath)) {
+            $this->packages[$package->getName()] = $packagePath;
+        }
+    }
+
+    /**
+     * Install packages
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  \Composer\Script\Event $event
+     * @return void
+     */
+    public function installPackages(ComposerScriptEvent $event)
+    {
+        // Bootstap Laravel application and console kernel
+        $this->bootstrapLaravel();
+
+        foreach ($this->packages as $package => $packagePath) {
+            $this->runInstallPackageCommand($package);
+        }
+
+        // Stop propagation
+        $event->stopPropagation();
+    }
+
+    /**
+     * Run Artisan install package command
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $package
+     * @return integer
+     */
+    public function runInstallPackageCommand($package)
+    {
+        return $this->getArtisan()->handle(
+            new \Symfony\Component\Console\Input\ArgvInput(['NodesComposer', 'nodes:package:install', $package]),
+            new \Symfony\Component\Console\Output\ConsoleOutput
+        );
+    }
+
+    /**
+     * Check if package has a service provider
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @param  string $packagePath
+     * @return boolean
+     */
+    protected function packageHasServiceProvider($packagePath)
+    {
+        return file_exists($packagePath . 'src/ServiceProvider.php');
+    }
+
+    /**
+     * Generate base path from package path
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @param  string $packagePath
+     * @return string
+     */
+    protected function generateBasePathFromPackagePath($packagePath)
+    {
+        return substr($packagePath, 0, strrpos($packagePath, '/vendor')+1);
+    }
+
+    /**
+     * Retrieve Laravel application
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return \Illuminate\Foundation\Application
+     */
+    public function getLaravel()
+    {
+        return $this->laravel;
+    }
+
+    /**
+     * Retrieve Artisan instance
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return \Illuminate\Foundation\Console\Kernel
+     */
+    public function getArtisan()
+    {
+        return $this->artisan;
     }
 
     /**
@@ -62,49 +226,15 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     public static function getSubscribedEvents()
     {
         return [
-            //ComposerPackageEvents::POST_PACKAGE_INSTALL => 'nodesInstallPackage'
-            ComposerPluginEvents::COMMAND => 'onCommand',
-            ComposerScriptEvents::PRE_UPDATE_CMD => 'onPreUpdateCmd',
-            ComposerScriptEvents::POST_UPDATE_CMD => 'onPostUpdateCmd',
-            ComposerPackageEvents::PRE_PACKAGE_UPDATE => 'onPrePackageUpdate',
-            ComposerPackageEvents::POST_PACKAGE_UPDATE => 'onPostPackageUpdate',
-            ComposerPackageEvents::PRE_PACKAGE_INSTALL => 'onPrePackageInstall',
-            ComposerPackageEvents::POST_PACKAGE_INSTALL => 'onPostPackageInstall',
+            ComposerScriptEvents::POST_INSTALL_CMD => [
+                ['installPackages', 0]
+            ],
+            ComposerScriptEvents::POST_UPDATE_CMD => [
+                ['installPackages', 0]
+            ],
+            ComposerPackageEvents::POST_PACKAGE_INSTALL => [
+                ['addPackage', 0]
+            ]
         ];
-    }
-
-    public function onCommand(ComposerPluginCommandEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . $event->getCommandName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
-    }
-
-    public function onPreUpdateCmd(ComposerScriptEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
-    }
-
-    public function onPostUpdateCmd(ComposerScriptEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
-    }
-
-    public function onPrePackageUpdate(ComposerPackageEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
-    }
-
-    public function onPostPackageUpdate(ComposerPackageEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
-    }
-
-    public function onPrePackageInstall(ComposerPackageEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
-    }
-
-    public function onPostPackageInstall(ComposerPackageEvent $event)
-    {
-        $this->io->write(__CLASS__ . '::' . __METHOD__ . "() -> " . $event->getName() . ' / ' . implode(', ', $event->getArguments()) . ' / ' . implode(', ', $event->getFlags()));
     }
 }

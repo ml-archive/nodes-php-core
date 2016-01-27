@@ -14,16 +14,15 @@ use Nodes\Exceptions\InstallPackageException;
 class InstallPackage extends Command
 {
     /**
-     * The name and signature of the console command.
+     * The name and signature of the console command
      *
      * @var string
      */
     protected $signature = 'nodes:package:install
-                            {package : Name of package (e.g. "nodes/core")}
-                            {--file : Filename of Service Provider located in package\'s "src/" folder}';
+                            {package : Name of package (e.g. "nodes/core")}';
 
     /**
-     * The console command description.
+     * The console command description
      *
      * @var string
      */
@@ -48,26 +47,20 @@ class InstallPackage extends Command
             throw new InstallPackageException(sprintf('Invalid package name [%s]', $package), 400);
         }
 
-        // Split package into vendor name and package name
-        list($vendor, $packageName) = explode('/', $package);
-
-        // Service Provider filename
-        $serviceProviderFileName = $this->option('file') ?: 'ServiceProvider.php';
-
         // Check if package is already installed.
         // If it is, we'll abort and do nothing.
-        if (nodes_is_package_installed($vendor, $packageName, $serviceProviderFileName)) {
+        if (nodes_is_package_installed($package)) {
             return;
         }
 
         // Make user confirm installation of package
         if (!$this->confirm(sprintf('Do you wish to install package <comment>[%s]</comment> into your application?', $package), true)) {
-            $this->output->block(sprintf('See README.md for instructions to manually install package [%s].', $package), 'TIP!', 'fg=white;bg=black', ' ', true);
+            $this->output->block(sprintf('Run "php artisan nodes:package:install %s" when you\'re ready to install the package [%s].', $package, $package), 'TIP!', 'fg=white;bg=black', ' ', true);
             return;
         }
 
         // Install service provider for package
-        $serviceProviderClass = nodes_install_service_provider($vendor, $packageName, $serviceProviderFileName);
+        $serviceProviderClass = nodes_install_service_provider($package);
         if ($serviceProviderClass === true) {
             return;
         }
@@ -76,11 +69,11 @@ class InstallPackage extends Command
         // such as to copy config files, views etc.
         $serviceProvider = app($serviceProviderClass, [$this->getLaravel()]);
         if ($serviceProvider instanceof NodesAbstractServiceProvider) {
-            // Set Console Outputter
+            // Set installer instance
             $serviceProvider->setInstaller($this);
 
             // Install package facades
-            if (is_null(nodes_install_facades($vendor, $packageName, $serviceProvider))) {
+            if (is_null(nodes_install_facades($package, $serviceProvider))) {
                 $this->error('Could not localte aliases array in [config/app.php]');
             }
 
@@ -89,7 +82,7 @@ class InstallPackage extends Command
         }
 
         // Successfully installed package
-        $this->info(sprintf('Service Provider for package <comment>[%s]</comment> was successfully installed.', sprintf('%s/%s', $vendor, $packageName)));
+        $this->info(sprintf('Package <comment>[%s]</comment> was successfully installed.', $package));
     }
 
     /**

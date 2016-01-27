@@ -361,7 +361,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     {
         foreach ($data as $from => $to) {
             // Prepare $from and $to paths
-            $from = base_path(sprintf('%s/%s/%s', $this->vendor, $this->package, $from));
+            $from = base_path(sprintf('vendor/%s/%s/%s', $this->vendor, $this->package, $from));
             $to = base_path($to);
 
             // Copy files or directory to application
@@ -400,7 +400,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         // Output status message
         $this->getInstaller()->line(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
-            'File', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
+                'File', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
         );
     }
 
@@ -432,7 +432,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         // Output status message
         $this->getInstaller()->line(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
-            'Directory', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
+                'Directory', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
         );
     }
 

@@ -12,11 +12,18 @@ use Nodes\Exceptions\InstallPackageException;
 class InstallPackage
 {
     /**
+     * Base path of application
+     *
+     * @var string
+     */
+    protected $basePath;
+
+    /**
      * Vendor name
      *
      * @var string
      */
-    protected $vendor = 'nodes';
+    protected $vendor;
 
     /**
      * Package name
@@ -24,6 +31,13 @@ class InstallPackage
      * @var string
      */
     protected $packageName;
+
+    /**
+     * Package namespace
+     *
+     * @var string
+     */
+    protected $packageNamespace;
 
     /**
      * Path to package
@@ -47,11 +61,18 @@ class InstallPackage
     protected $serviceProviderFilePath;
 
     /**
-     * Composer's class map
+     * Composer's PSR-4 array
      *
      * @var array
      */
-    protected $composerClassMap;
+    protected $composerPsr4;
+
+    /**
+     * Application config
+     *
+     * @var array
+     */
+    protected $config = [];
 
     /**
      * Installer instance
@@ -59,19 +80,6 @@ class InstallPackage
      * @var \Illuminate\Console\Command
      */
     protected $installer;
-
-    /**
-     * InstallPackage constructor
-     *
-     * @author Morten Rugaard <moru@nodes.dk>
-     *
-     * @access public
-     */
-    public function __construct()
-    {
-        // Composers class map
-        $this->composerClassMap = require(base_path('vendor/composer/autoload_classmap.php'));
-    }
 
     /**
      * Prepare package by locating package path
@@ -85,17 +93,16 @@ class InstallPackage
     protected function preparePackage()
     {
         // Validate required package information
-        if (empty($this->vendor) || empty($this->packageName)) {
-            throw new InstallPackageException(sprintf('Vendor [%s] or Package Name [%s] is not set.', $this->vendor, $this->packageName), 400);
+        if (empty($this->getVendorName()) || empty($this->getPackageName())) {
+            throw new InstallPackageException(sprintf('Vendor [%s] or Package Name [%s] is not set.', $this->getVendorName(), $this->getPackageName()), 400);
         }
 
         // Generate path to package
-        // $vendorPath = base_path(sprintf('vendor/%s/%s', $name[0], $name[1]));
-        $this->packagePath = $packagePath = base_path(sprintf('%s/%s', $this->vendor, $this->packageName));
+        $this->packagePath = $packagePath = $this->getVendorPath($this->getVendorPackageName());
 
         // Check if package exists in the vendor folder
         if (!file_exists($packagePath)) {
-            throw new InstallPackageException(sprintf('[%s] was not be found in the vendor folder [%s].', $this->packageName, base_path('vendor/')), 400);
+            throw new InstallPackageException(sprintf('[%s] was not be found in the vendor folder [%s].', $this->getPackageName(), $this->getVendorPath()), 400);
         }
 
         return $this;
@@ -107,22 +114,25 @@ class InstallPackage
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access protected
-     * @param  string $serviceProviderFilename
      * @return $this
      * @throws \Nodes\Exceptions\InstallPackageException
      */
-    protected function prepareServiceProvider($serviceProviderFilename)
+    protected function prepareServiceProvider()
     {
         // Generate path to service provider file
-        $this->serviceProviderFilePath = $serviceProviderFilePath = sprintf('%s/src/%s', $this->packagePath, $serviceProviderFilename);
+        $this->serviceProviderFilePath = $serviceProviderFilePath = $this->getPackageServiceProviderFilePath();
         if (!file_exists($serviceProviderFilePath)) {
-            throw new InstallPackageException(sprintf('[%s] was not be found in the package folder [%s].', $serviceProviderFilename, $this->packagePath), 400);
+            throw new InstallPackageException(sprintf('[ServiceProvider.php] was not be found in the package folder [%s].', $this->getPackagePath()), 500);
         }
 
-        $this->serviceProvider = $serviceProvider = array_search($serviceProviderFilePath, $this->composerClassMap);
-        if (!$serviceProvider) {
-            throw new InstallPackageException(sprintf('Service Provider [%s] for package [%s] was not found in Composers class map.', $serviceProvider, sprintf('%s/%s', $this->vendor, $this->packageName)), 400);
+        // Namespace of package
+        $this->packageNamespace = $packageNamespace = $this->locatePackageNamespaceFromComposer();
+        if (empty($packageNamespace)) {
+            throw new InstallPackageException(sprintf('Could not locate namespace of package [%s] in Composers list of PSR-4 registed packages. Run "composer dump-autoload" and try again.', $this->getVendorPackageName()), 500);
         }
+
+        // Set namespace of package's service provider
+        $this->serviceProvider = sprintf('%sServiceProvider', $this->packageNamespace);
 
         return $this;
     }
@@ -133,20 +143,16 @@ class InstallPackage
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @param  string $serviceProviderFilename
      * @return boolean
      * @throws \Nodes\Exceptions\InstallPackageException
      */
-    public function isPackageInstalled($serviceProviderFilename = 'ServiceProvider.php')
+    public function isPackageInstalled()
     {
         // Prepare package and service provider
-        $this->preparePackage()->prepareServiceProvider($serviceProviderFilename);
-
-        // Load Laravel's "app config" into an array
-        $config = file(config_path('app.php'));
+        $this->preparePackage()->prepareServiceProvider();
 
         // Look for package service provider
-        $checkIfServiceProviderIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $this->serviceProvider)), $config));
+        $checkIfServiceProviderIsAlreadyInstalled = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->serviceProvider)));
 
         // If service provider is found,
         // we can conclude the package is already installed
@@ -163,19 +169,16 @@ class InstallPackage
      */
     public function addNodesServiceProvider()
     {
-        // Load Laravel's "app config" into an array
-        $config = file(config_path('app.php'));
-
         // Locate "Nodes Core Service Provider" position in providers array
-        $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config));
+        $locateNodesCoreProviderPosition = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->getCoreServiceProviderNamespace())));
         if (!empty($locateNodesCoreProviderPosition[0])) {
             return true;
         }
 
-        $locateNodesCoreProviderArrayPosition = array_keys(preg_grep("|'providers' =>|", $config));
-        for($i = $locateNodesCoreProviderArrayPosition[0]; $i < count($config); $i++) {
+        $locateNodesCoreProviderArrayPosition = $this->searchApplicationConfig('\'providers\' =>');
+        for($i = $locateNodesCoreProviderArrayPosition[0]; $i < count($this->getApplicationConfig()); $i++) {
             // Trim current config line
-            $value = trim($config[$i]);
+            $value = trim($this->getApplicationConfig()[$i]);
 
             // If line is not the end of the "providers" array
             // continue onwards to next line
@@ -191,12 +194,12 @@ class InstallPackage
             $serviceProviderSnippet .= str_repeat("\t", 2) . 'Nodes\ServiceProvider::class,' . "\n";
 
             // Add service provider snippet to config array
-            array_splice($config, $i, 0, $serviceProviderSnippet);
+            $this->addToApplicationConfig($i, $serviceProviderSnippet);
             break;
         }
 
-        // Update service provider config
-        file_put_contents(config_path('app.php'), implode('', $config));
+        // Update application config
+        $this->updateApplicationConfig();
 
         return true;
     }
@@ -207,56 +210,50 @@ class InstallPackage
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @param  string  $serviceProviderFilename
      * @return string|boolean  Returns true if service provider is already installed
      * @throws \Nodes\Exceptions\InstallPackageException
      */
-    public function installServiceProvider($serviceProviderFilename = 'ServiceProvider.php')
+    public function installServiceProvider()
     {
         // Check if service provider is already installed
-        if ($this->isPackageInstalled($serviceProviderFilename)) {
+        if ($this->isPackageInstalled()) {
             return true;
         }
 
         // Make sure to load service provider
         // if it for some reason isn't already
         if (!class_exists($this->serviceProvider)) {
-            require_once($this->serviceProviderFilePath);
+            require_once($this->getPackageServiceProviderFilePath());
         }
 
-        // Load Laravel's app config into an array
-        $config = file(config_path('app.php'));
-
         // Make sure package service provider isn't already installed
-        $checkIfServiceProviderIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $this->serviceProvider)), $config));
+        $checkIfServiceProviderIsAlreadyInstalled = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->serviceProvider)));
         if (!empty($checkIfServiceProviderIsAlreadyInstalled[0])) {
             return true;
         }
 
         // Locate position of Nodes (Core) service provider in config file
-        $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config));
+        $locateNodesCoreProviderPosition = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->getCoreServiceProviderNamespace())));
         if (empty($locateNodesCoreProviderPosition[0])) {
             // Nodes Core service provider is missing from config file.
             // We'll start by adding that and then try again.
             $this->addNodesServiceProvider();
 
-            // Reload config file
-            $config = file(config_path('app.php'));
-
             // Lets' try and locate the position again.
-            $locateNodesCoreProviderPosition = array_keys(preg_grep('|Nodes\\\\ServiceProvider::class|', $config));
+            $locateNodesCoreProviderPosition = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->getCoreServiceProviderNamespace())));
         }
 
         // Service Provider namespace
         $serviceProviderNamespace = explode('\\', sprintf('%s::class', $this->serviceProvider));
 
         // Add package service provider to Laravel's app config
-        for($i = $locateNodesCoreProviderPosition[0]+1; $i < count($config); $i++) {
+        for($i = $locateNodesCoreProviderPosition[0]+1; $i < count($this->getApplicationConfig()); $i++) {
             // Get value of next item in providers array
-            $value = trim($config[$i]);
+            $value = trim($this->getApplicationConfig()[$i]);
 
             // If we're on a line where there's already a service provider,
             // we'll take the namespace and match it up against our own.
+            //
             // If our service provider doesn't fit here, we'll move on to next line.
             if (!empty($value) && $value != '],') {
                 // Current item namespace
@@ -272,7 +269,7 @@ class InstallPackage
                     $comparison = strnatcmp($namespacePart, $serviceProviderNamespace[$key]);
 
                     // Namespace parts are identical
-                    // move on to the next part.
+                    // move on to next part
                     if ($comparison == 0) {
                         continue;
                     }
@@ -292,14 +289,14 @@ class InstallPackage
 
             // Success!
             // Insert service provider at current line
-            array_splice($config, $i, 0, [
-                str_repeat("\t", 2) . sprintf('%s::class,', $this->serviceProvider) . "\n"
+            $this->addToApplicationConfig($i, [
+                str_repeat(' ', 8) . sprintf('%s::class,', $this->serviceProvider) . "\n"
             ]);
             break;
         }
 
         // Update existing config
-        file_put_contents(config_path('app.php'), implode('', $config));
+        $this->updateApplicationConfig();
 
         return $this->serviceProvider;
     }
@@ -320,11 +317,8 @@ class InstallPackage
             return false;
         }
 
-        // Load Laravel's app config into an array
-        $config = file(config_path('app.php'));
-
         // Locate beginning of $aliases array
-        $locateAliasesArray = array_keys(preg_grep('|\'aliases\' => \[|', $config));
+        $locateAliasesArray = $this->searchApplicationConfig('\'aliases\' => \[');
         if (empty($locateAliasesArray[0])) {
             return null;
         }
@@ -332,14 +326,14 @@ class InstallPackage
         foreach ($facades as $facadeName => $facadeNamespace) {
             // If facade is already installed,
             // we'll just skip it and move along.
-            $checkIfFacadesIsAlreadyInstalled = array_keys(preg_grep(sprintf('|%s::class|', str_replace('\\', '\\\\', $facadeNamespace)), $config));
+            $checkIfFacadesIsAlreadyInstalled = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($facadeNamespace)));
             if (!empty($checkIfFacadesIsAlreadyInstalled[0])) {
                 continue;
             }
 
-            for ($i = $locateAliasesArray[0]+1; $i < count($config); $i++) {
+            for ($i = $locateAliasesArray[0]+1; $i < count($this->getApplicationConfig()); $i++) {
                 // Get value of next line
-                $value = trim($config[$i]);
+                $value = trim($this->getApplicationConfig()[$i]);
 
                 // If we're on an empty line, we'll continue to next one
                 //
@@ -366,17 +360,154 @@ class InstallPackage
 
                 // Success!
                 // We're inserting our facade at the current line.
-                array_splice($config, $i, 0, [
-                    str_repeat("\t", 2) . sprintf('\'%s\' => %s::class,', $facadeName, $facadeNamespace) . "\n"
+                $this->addToApplicationConfig($i, [
+                    str_repeat(' ', 8) . sprintf('\'%s\' => %s::class,', $facadeName, $facadeNamespace) . "\n"
                 ]);
                 break;
             }
         }
 
         // Update existing config
-        file_put_contents(config_path('app.php'), implode('', $config));
+        $this->updateApplicationConfig();
 
         return true;
+    }
+
+    /**
+     * Escape namespace
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @param  string $namespace
+     * @return string
+     */
+    protected function escapeNamespace($namespace)
+    {
+        return str_replace('\\', '\\\\', $namespace);
+    }
+
+    /**
+     * Retrieve application config
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getApplicationConfig()
+    {
+        if (!empty($this->config)) {
+            return $this->config;
+        }
+
+        return $this->config = file($this->getConfigPath('app.php'));
+    }
+
+    /**
+     * Add to application config
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $line
+     * @param  string $content
+     * @return array
+     */
+    public function addToApplicationConfig($line, $content)
+    {
+        return array_splice($this->config, $line, 0, $content);
+    }
+
+    /**
+     * Write to application config
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return boolean
+     */
+    public function updateApplicationConfig()
+    {
+        return (bool) file_put_contents($this->getConfigPath('app.php'), implode('', $this->getApplicationConfig()));
+    }
+
+    /**
+     * Search application config
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $pattern   Regular expression pattern
+     * @param  string $modifiers Regular expression modifiers
+     * @return array
+     */
+    public function searchApplicationConfig($pattern, $modifiers = '')
+    {
+        return array_keys(preg_grep(sprintf('|%s|%s', $pattern, $modifiers), $this->getApplicationConfig()));
+    }
+
+    /**
+     * Set base path
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $basePath
+     * @return $this
+     */
+    public function setBasePath($basePath)
+    {
+        $this->basePath = $basePath;
+        return $this;
+    }
+
+    /**
+     * Retrieve base path of application
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $append
+     * @return string
+     */
+    public function getBasePath($append = null)
+    {
+        if (empty($this->basePath)) {
+            $this->basePath = dirname(__FILE__, 6) . '/';
+        }
+
+        return !empty($append) ? $this->basePath . $append : $this->basePath;
+    }
+
+    /**
+     * Retrieve config path of application
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $append
+     * @return string
+     */
+    public function getConfigPath($append = null)
+    {
+        $configPath = $this->getBasePath('config/');
+        return !empty($append) ? $configPath . $append : $configPath;
+    }
+
+    /**
+     * Retrieve vendor path of application
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $append
+     * @return string
+     */
+    public function getVendorPath($append = null)
+    {
+        $vendorPath = $this->getBasePath('vendor/');
+        return !empty($append) ? $vendorPath . $append : $vendorPath;
     }
 
     /**
@@ -395,6 +526,19 @@ class InstallPackage
     }
 
     /**
+     * Retrieve vendor name
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getVendorName()
+    {
+        return $this->vendor;
+    }
+
+    /**
      * Set package name to install
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -410,6 +554,142 @@ class InstallPackage
     }
 
     /**
+     * Retrieve package name
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getPackageName()
+    {
+        return $this->packageName;
+    }
+
+    /**
+     * Set package path
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $packagePath
+     * @return $this
+     */
+    public function setPackagePath($packagePath)
+    {
+        $this->packagePath = $packagePath;
+        return $this;
+    }
+
+    /**
+     * Retrieve package path
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getPackagePath()
+    {
+        return $this->packagePath;
+    }
+
+    /**
+     * Retrieve package service provider file path
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getPackageServiceProviderFilePath()
+    {
+        return sprintf('%s/src/ServiceProvider.php', $this->getPackagePath());
+    }
+
+    /**
+     * Set vendor and package name
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $package
+     * @return $this
+     */
+    public function setVendorPackageName($package)
+    {
+        // Split package into vendor name and package name
+        list($vendorName, $packageName) = explode('/', $package);
+
+        // Set vendor name and package name
+        return $this->setVendorName($vendorName)->setPackageName($packageName);
+    }
+
+    /**
+     * Retrieve vendor/package name
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getVendorPackageName()
+    {
+        return sprintf('%s/%s', $this->getVendorName(), $this->getPackageName());
+    }
+
+    /**
+     * Locate package namespace from Composer's array
+     * of PSR-4 registered packages
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string|null
+     */
+    public function locatePackageNamespaceFromComposer()
+    {
+        // Load Composer's array of PSR-4 registered packages
+        $composerPsr4 = (array) require($this->getBasePath('vendor/composer/autoload_psr4.php'));
+        if (empty($composerPsr4)) {
+            return null;
+        }
+
+        // Generate our package path
+        $packagePath = sprintf('%s/src', $this->getPackagePath());
+
+        // Loop through all PSR-4 registered packages
+        // and look for our package path.
+        //
+        // If found return the namespace connected to
+        // our package path
+        foreach ($composerPsr4 as $packageNamespace => $path) {
+            // Incorrect package path. Move on.
+            if ($path[0] != $packagePath) {
+                continue;
+            }
+
+            // Return found package namespace
+            return $packageNamespace;
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieve namespace of core service provider
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getCoreServiceProviderNamespace()
+    {
+        return 'Nodes\\ServiceProvider';
+    }
+
+    /**
      * Set installer instance
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -418,7 +698,7 @@ class InstallPackage
      * @access public
      * @param  \Illuminate\Console\Command $installer
      * @return $this
-     *
+     */
     public function setInstaller(IlluminateConsoleCommand $installer)
     {
         $this->installer = $installer;
@@ -432,10 +712,9 @@ class InstallPackage
      *
      * @access public
      * @return \Illuminate\Console\Command
-     *
+     */
     public function getInstaller()
     {
         return $this->installer;
     }
-     */
 }
