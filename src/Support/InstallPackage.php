@@ -469,6 +469,7 @@ class InstallPackage
      *
      * @access protected
      * @return $this
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function bootstrapLaravelArtisan()
     {
@@ -482,6 +483,33 @@ class InstallPackage
         $this->artisan = $laravel->build(IlluminateConsoleKernel::class);
 
         return $this;
+    }
+
+    /**
+     * Call Artisan command
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  string $command
+     * @param  array $params
+     * @return void
+     */
+    public function callArtisanCommand($command, array $params = [])
+    {
+        // Default input arguments
+        $inputArguments = ['NodesInstaller', $command];
+
+        // Add params to input arguments
+        if (!empty($params)) {
+            $inputArguments[] = implode(' ', $params);
+        }
+
+        // Execute Artisan command
+        $this->getArtisan()->handle(
+            new \Symfony\Component\Console\Input\ArgvInput($inputArguments),
+            new \Symfony\Component\Console\Output\ConsoleOutput
+        );
     }
 
     /**
