@@ -18,6 +18,10 @@ class ServiceProvider extends AbstractServiceProvider
      */
     protected $package = 'core';
 
+    protected $configs = [
+        'config/project.php' => 'config/nodes/project.php'
+    ];
+
     /**
      * Register Artisan commands
      *

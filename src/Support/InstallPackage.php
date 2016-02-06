@@ -187,7 +187,7 @@ class InstallPackage
         // Locate "Nodes Core Service Provider" position in providers array
         $locateNodesCoreProviderPosition = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->getCoreServiceProviderNamespace())));
         if (!empty($locateNodesCoreProviderPosition[0])) {
-            return true;
+            return false;
         }
 
         $locateNodesCoreProviderArrayPosition = $this->searchApplicationConfig('\'providers\' =>');
@@ -232,7 +232,7 @@ class InstallPackage
     {
         // Check if service provider is already installed
         if ($this->isPackageInstalled()) {
-            return true;
+            return $this->serviceProvider;;
         }
 
         // Make sure to load service provider
@@ -244,7 +244,7 @@ class InstallPackage
         // Make sure package service provider isn't already installed
         $checkIfServiceProviderIsAlreadyInstalled = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->serviceProvider)));
         if (!empty($checkIfServiceProviderIsAlreadyInstalled[0])) {
-            return true;
+            return $this->serviceProvider;
         }
 
         // Locate position of Nodes (Core) service provider in config file
@@ -252,10 +252,12 @@ class InstallPackage
         if (empty($locateNodesCoreProviderPosition[0])) {
             // Nodes Core service provider is missing from config file.
             // We'll start by adding that and then try again.
-            $this->addNodesServiceProvider();
+            if ($this->addNodesServiceProvider()) {
+                $this->callArtisanCommand('nodes:package:install', ['nodes/core']);
+            }
 
             // Lets' try and locate the position again.
-            $locateNodesCoreProviderPosition = $this->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->getCoreServiceProviderNamespace())));
+            $locateNodesCoreProviderPosition = $this->reloadApplicationConfig()->searchApplicationConfig(sprintf('%s::class', $this->escapeNamespace($this->getCoreServiceProviderNamespace())));
         }
 
         // Service Provider namespace
@@ -420,6 +422,20 @@ class InstallPackage
     }
 
     /**
+     * Reload application config
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return $this
+     */
+    public function reloadApplicationConfig()
+    {
+        $this->config = file($this->getConfigPath('app.php'));
+        return $this;
+    }
+
+    /**
      * Add to application config
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -469,7 +485,6 @@ class InstallPackage
      *
      * @access protected
      * @return $this
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function bootstrapLaravelArtisan()
     {

@@ -37,6 +37,13 @@ class InstallPackage extends Command
     protected $nodesInstaller;
 
     /**
+     * Array of packages that should be force installed
+     *
+     * @var array
+     */
+    private $forceInstallPackage = ['nodes/core'];
+
+    /**
      * Install package's service provider
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -62,9 +69,11 @@ class InstallPackage extends Command
         // Set vendor and package name
         $nodesInstaller->setVendorPackageName($package);
 
-        // Check if package is already installed.
-        // If it is, we'll abort and do nothing.
-        if ($nodesInstaller->isPackageInstalled($package)) {
+        // Check if we should force run package installation
+        $forcePackageInstall = in_array($package, $this->forceInstallPackage);
+
+        // Check if package is already installed
+        if (!$forcePackageInstall && $nodesInstaller->isPackageInstalled($package)) {
             return;
         }
 
@@ -76,24 +85,13 @@ class InstallPackage extends Command
 
         // Install service provider for package
         $serviceProviderClass = $nodesInstaller->installServiceProvider($package);
-        if ($serviceProviderClass === true) {
-            return;
-        }
 
         // Ask a series of installation questions
         // such as to copy config files, views etc.
         $serviceProvider = app($serviceProviderClass, [$this->getLaravel()]);
         if ($serviceProvider instanceof NodesAbstractServiceProvider) {
-            // Set Nodes installer on service provider
-            $serviceProvider->setInstaller($nodesInstaller)->setCommand($this);
-
-            // Install package facades
-            if (is_null($nodesInstaller->installFacades($package, $serviceProvider))) {
-                $this->error('Could not localte aliases array in [config/app.php]');
-            }
-
-            // Run package install sequence
-            $serviceProvider->install();
+            // Execute package install sequence
+            $serviceProvider->setInstaller($nodesInstaller)->setCommand($this)->install();
         }
 
         // Successfully installed package
