@@ -5,20 +5,16 @@ if (!function_exists('nodes_install_service_provider')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $vendorName
-     * @param  string $packageName
-     * @param  string $serviceProviderFilename
+     * @param  string $package
      * @return string
      */
-    function nodes_install_service_provider($vendorName, $packageName, $serviceProviderFilename = 'ServiceProvider.php')
+    function nodes_install_service_provider($package)
     {
         // Instantiate Install Package handler
         $installPackage = app(\Nodes\Support\InstallPackage::class);
 
         // Install service provider for package
-        return $installPackage->setVendorName($vendorName)
-                              ->setPackageName($packageName)
-                              ->installServiceProvider($serviceProviderFilename);
+        return $installPackage->setVendorPackageName($package)->installServiceProvider();
     }
 }
 
@@ -28,21 +24,17 @@ if (!function_exists('nodes_install_facades')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string                         $vendorName
-     * @param  string                         $packageName
+     * @param  string                         $package
      * @param  \Nodes\AbstractServiceProvider $serviceProvider
      * @return boolean
      */
-    function nodes_install_facades($vendorName, $packageName, \Nodes\AbstractServiceProvider $serviceProvider)
+    function nodes_install_facades($package, \Nodes\AbstractServiceProvider $serviceProvider)
     {
         // Instantiate Install Package handler
         $installPackage = app(\Nodes\Support\InstallPackage::class);
 
-        // Install service provider for package
-        return $installPackage//->setInstaller($serviceProvider->getInstaller())
-                              ->setVendorName($vendorName)
-                              ->setPackageName($packageName)
-                              ->installFacades($serviceProvider->getFacades());
+        // Install facades belonging to package
+        return $installPackage->setVendorPackageName($package)->installFacades($serviceProvider->getFacades());
     }
 }
 
@@ -52,19 +44,15 @@ if (!function_exists('nodes_is_package_installed')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $vendorName
-     * @param  string $packageName
-     * @param  string $serviceProviderFilename
+     * @param  string $package
      * @return boolean
      */
-    function nodes_is_package_installed($vendorName, $packageName, $serviceProviderFilename = 'ServiceProvider.php')
+    function nodes_is_package_installed($package)
     {
         // Instantiate Install Package handler
         $installPackage = app(\Nodes\Support\InstallPackage::class);
 
         // Check if package is already installed
-        return $installPackage->setVendorName($vendorName)
-                              ->setPackageName($packageName)
-                              ->isPackageInstalled($serviceProviderFilename);
+        return $installPackage->setVendorPackageName($package)->isPackageInstalled();
     }
 }
