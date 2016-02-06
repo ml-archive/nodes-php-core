@@ -2,6 +2,7 @@
 namespace Nodes\Support;
 
 use Illuminate\Console\Command as IlluminateConsoleCommand;
+use Illuminate\Foundation\Console\Kernel as IlluminateConsoleKernel;
 use Nodes\Exceptions\InstallPackageException;
 
 /**
@@ -73,6 +74,20 @@ class InstallPackage
      * @var array
      */
     protected $config = [];
+
+    /**
+     * Laravel application
+     *
+     * @var \Illuminate\Foundation\Application
+     */
+    protected $laravel;
+
+    /**
+     * Artisan application
+     *
+     * @var \Illuminate\Foundation\Console\Kernel
+     */
+    protected $artisan;
 
     /**
      * Installer instance
@@ -188,10 +203,10 @@ class InstallPackage
 
             // Generate service provider content
             $serviceProviderSnippet  = '' . "\n";
-            $serviceProviderSnippet .= str_repeat("\t", 2) . '/**' . "\n";
-            $serviceProviderSnippet .= str_repeat("\t", 2) . ' * Nodes Service Providers' . "\n";
-            $serviceProviderSnippet .= str_repeat("\t", 2) . ' */' . "\n";
-            $serviceProviderSnippet .= str_repeat("\t", 2) . 'Nodes\ServiceProvider::class,' . "\n";
+            $serviceProviderSnippet .= str_repeat(' ', 8) . '/**' . "\n";
+            $serviceProviderSnippet .= str_repeat(' ', 8) . ' * Nodes Service Providers' . "\n";
+            $serviceProviderSnippet .= str_repeat(' ', 8) . ' */' . "\n";
+            $serviceProviderSnippet .= str_repeat(' ', 8) . 'Nodes\ServiceProvider::class,' . "\n";
 
             // Add service provider snippet to config array
             $this->addToApplicationConfig($i, $serviceProviderSnippet);
@@ -448,6 +463,28 @@ class InstallPackage
     }
 
     /**
+     * Bootstrap Laravel and Artisan applications
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return $this
+     */
+    public function bootstrapLaravelArtisan()
+    {
+        // Autoload required bootstrap files
+        require_once $this->getBasePath('bootstrap/autoload.php');
+
+        // Bootstrap Laravel application
+        $this->laravel = $laravel = require $this->getBasePath('bootstrap/app.php');
+
+        // Bootstrap Artisan instance
+        $this->artisan = $laravel->build(IlluminateConsoleKernel::class);
+
+        return $this;
+    }
+
+    /**
      * Set base path
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -650,7 +687,7 @@ class InstallPackage
     public function locatePackageNamespaceFromComposer()
     {
         // Load Composer's array of PSR-4 registered packages
-        $composerPsr4 = (array) require($this->getBasePath('vendor/composer/autoload_psr4.php'));
+        $composerPsr4 = (array) require $this->getBasePath('vendor/composer/autoload_psr4.php');
         if (empty($composerPsr4)) {
             return null;
         }
@@ -677,16 +714,29 @@ class InstallPackage
     }
 
     /**
-     * Retrieve namespace of core service provider
+     * Retrieve Laravel application
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @return string
+     * @return \Illuminate\Foundation\Application
      */
-    public function getCoreServiceProviderNamespace()
+    public function getLaravel()
     {
-        return 'Nodes\\ServiceProvider';
+        return $this->laravel;
+    }
+
+    /**
+     * Retrieve Artisan instance
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return \Illuminate\Foundation\Console\Kernel
+     */
+    public function getArtisan()
+    {
+        return $this->artisan;
     }
 
     /**
@@ -716,5 +766,18 @@ class InstallPackage
     public function getInstaller()
     {
         return $this->installer;
+    }
+
+    /**
+     * Retrieve namespace of core service provider
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return string
+     */
+    public function getCoreServiceProviderNamespace()
+    {
+        return 'Nodes\\ServiceProvider';
     }
 }

@@ -9,6 +9,7 @@ use Composer\IO\IOInterface as ComposerIOContract;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event as ComposerScriptEvent;
 use Composer\Script\ScriptEvents as ComposerScriptEvents;
+use Nodes\Support\InstallPackage as NodesInstaller;
 
 /**
  * Class Composer
@@ -39,25 +40,18 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     protected $io;
 
     /**
+     * Nodes Installer instance
+     *
+     * @var \Nodes\Support\InstallPackage
+     */
+    protected $nodesInstaller;
+
+    /**
      * Packages to install
      *
      * @var array
      */
     protected $packages = [];
-
-    /**
-     * Laravel application
-     *
-     * @var \Illuminate\Foundation\Application
-     */
-    protected $laravel;
-
-    /**
-     * Artisan application
-     *
-     * @var \Illuminate\Foundation\Console\Kernel
-     */
-    protected $artisan;
 
     /**
      * Activate is called after the plugin is loaded
@@ -73,28 +67,7 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     {
         $this->composer = $composer;
         $this->io = $io;
-    }
-
-    /**
-     * Bootstrap Laravel application
-     *
-     * @author Morten Rugaard <moru@nodes.dk>
-     *
-     * @access protected
-     * @return \Illuminate\Foundation\Application
-     */
-    protected function bootstrapLaravel()
-    {
-        // Autoload required bootstrap files
-        require __DIR__ . '/../../../../../bootstrap/autoload.php';
-
-        // Bootstrap Laravel application
-        $this->laravel = $laravel = require_once __DIR__ . '/../../../../../bootstrap/app.php';
-
-        // Bootstrap Artisan application
-        $this->artisan = $laravel->make(\Illuminate\Contracts\Console\Kernel::class);
-
-        return $laravel;
+        $this->nodesInstaller = new NodesInstaller;
     }
 
     /**
@@ -132,14 +105,26 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
      */
     public function installPackages(ComposerScriptEvent $event)
     {
-        // Bootstap Laravel application and console kernel
-        $this->bootstrapLaravel();
+        // Only continue if there is packages to install
+        if (empty($this->packages)) {
+            $event->stopPropagation();
+            return;
+        }
 
+        // Make sure Nodes core service provider
+        // has been installed before bootstraping Artisan
+        $this->nodesInstaller->addNodesServiceProvider();
+
+        // Bootstap Laravel and Artisan application
+        $this->nodesInstaller->bootstrapLaravelArtisan();
+
+        // Install found packages
         foreach ($this->packages as $package => $packagePath) {
             $this->runInstallPackageCommand($package);
         }
 
-        $this->getArtisan()->terminate(null, null);
+        // Terminate Artisan instance
+        $this->nodesInstaller->getArtisan()->terminate(null, null);
 
         // Stop propagation
         $event->stopPropagation();
@@ -156,7 +141,7 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
      */
     public function runInstallPackageCommand($package)
     {
-        return $this->getArtisan()->handle(
+        return $this->nodesInstaller->getArtisan()->handle(
             new \Symfony\Component\Console\Input\ArgvInput(['NodesComposer', 'nodes:package:install', $package]),
             new \Symfony\Component\Console\Output\ConsoleOutput
         );
@@ -188,32 +173,6 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
     protected function generateBasePathFromPackagePath($packagePath)
     {
         return substr($packagePath, 0, strrpos($packagePath, '/vendor')+1);
-    }
-
-    /**
-     * Retrieve Laravel application
-     *
-     * @author Morten Rugaard <moru@nodes.dk>
-     *
-     * @access public
-     * @return \Illuminate\Foundation\Application
-     */
-    public function getLaravel()
-    {
-        return $this->laravel;
-    }
-
-    /**
-     * Retrieve Artisan instance
-     *
-     * @author Morten Rugaard <moru@nodes.dk>
-     *
-     * @access public
-     * @return \Illuminate\Foundation\Console\Kernel
-     */
-    public function getArtisan()
-    {
-        return $this->artisan;
     }
 
     /**

@@ -5,6 +5,7 @@ use Illuminate\Console\Command;
 use Nodes\AbstractServiceProvider as NodesAbstractServiceProvider;
 use Nodes\Exceptions\InstallNodesPackageException;
 use Nodes\Exceptions\InstallPackageException;
+use Nodes\Support\InstallPackage as NodesInstaller;
 
 /**
  * Class InstallPackage
@@ -29,16 +30,27 @@ class InstallPackage extends Command
     protected $description = 'Install a Nodes package into your project';
 
     /**
+     * Nodes installer
+     *
+     * @var \Nodes\Support\InstallPackage
+     */
+    protected $nodesInstaller;
+
+    /**
      * Install package's service provider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
+     * @param  \Nodes\Support\InstallPackage $nodesInstaller
      * @return void
      * @throws \Nodes\Exceptions\InstallPackageException
      */
-    public function handle()
+    public function handle(NodesInstaller $nodesInstaller)
     {
+        // Bootstrap Nodes Installer
+        $nodesInstaller->bootstrapLaravelArtisan();
+
         // Retrieve package name
         $package = $this->argument('package');
 
@@ -47,9 +59,12 @@ class InstallPackage extends Command
             throw new InstallPackageException(sprintf('Invalid package name [%s]', $package), 400);
         }
 
+        // Set vendor and package name
+        $nodesInstaller->setVendorPackageName($package);
+
         // Check if package is already installed.
         // If it is, we'll abort and do nothing.
-        if (nodes_is_package_installed($package)) {
+        if ($nodesInstaller->isPackageInstalled($package)) {
             return;
         }
 
@@ -60,7 +75,7 @@ class InstallPackage extends Command
         }
 
         // Install service provider for package
-        $serviceProviderClass = nodes_install_service_provider($package);
+        $serviceProviderClass = $nodesInstaller->installServiceProvider($package);
         if ($serviceProviderClass === true) {
             return;
         }
@@ -69,11 +84,11 @@ class InstallPackage extends Command
         // such as to copy config files, views etc.
         $serviceProvider = app($serviceProviderClass, [$this->getLaravel()]);
         if ($serviceProvider instanceof NodesAbstractServiceProvider) {
-            // Set installer instance
-            $serviceProvider->setInstaller($this);
+            // Set Nodes installer on service provider
+            $serviceProvider->setInstaller($nodesInstaller)->setCommand($this);
 
             // Install package facades
-            if (is_null(nodes_install_facades($package, $serviceProvider))) {
+            if (is_null($nodesInstaller->installFacades($package, $serviceProvider))) {
                 $this->error('Could not localte aliases array in [config/app.php]');
             }
 

@@ -2,13 +2,16 @@
 namespace Nodes;
 
 use Exception;
-use Illuminate\Console\Command as IlluminateConsoleCommand;
+use Illuminate\Console\Command as IlluminateCommand;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\Filesystem as Flysystem;
 use League\Flysystem\MountManager;
 use Nodes\Exceptions\InstallPackageException;
+use Nodes\Support\InstallPackage as NodesInstaller;
+use Symfony\Component\Console\Input\ArgvInput as SymfonyConsoleInput;
+use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
 
 /**
  * Class ServiceProvider
@@ -89,11 +92,18 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     protected $files;
 
     /**
-     * Install package instance
+     * Nodes installer
+     *
+     * @var \Nodes\Support\InstallPackage
+     */
+    protected $installer;
+
+    /**
+     * Current console command
      *
      * @var \Illuminate\Console\Command
      */
-    protected $installer;
+    protected $command;
 
     /**
      * Register the service provider
@@ -139,7 +149,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Make sure we have the Console Output style
         // before continuing with the install sequence
-        if (empty($this->getInstaller())) {
+        if (empty($this->getCommand())) {
             throw new InstallPackageException('Could not run install sequence. Reason: Missing Console Output reference.');
         }
 
@@ -306,17 +316,18 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
+     * @access protected
      * @return void
      */
-    protected function runDatabaseMigrationsAndSeeders()
+    final protected function runDatabaseMigrationsAndSeeders()
     {
         // Ask to migrate the database,
         // if we've copied any migration files to the application.
-        if (!empty($this->migrations) && $this->getInstaller()->confirm('Do you wish to migrate your database?', true)) {
+        if (!empty($this->migrations) && $this->getCommand()->confirm('Do you wish to migrate your database?', true)) {
             try {
-                $this->getInstaller()->call('migrate');
+                $this->getCommand()->call('migrate');
             } catch (Exception $e) {
-                $this->getInstaller()->error(sprintf('Could not migrate your database. Reason: %s', $e->getMessage()));
+                $this->getCommand()->error(sprintf('Could not migrate your database. Reason: %s', $e->getMessage()));
             }
         }
 
@@ -333,16 +344,19 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Ask to seed the database,
         // if we've copied any migration files to the application.
-        if (!empty($seeders) && $this->getInstaller()->confirm('Do you wish to seed your database?', true)) {
-            passthru('composer dump-autoload --optimize');
+        if (!empty($seeders) && $this->getCommand()->confirm('Do you wish to seed your database?', true)) {
+            // Load seeders directory so new seeders are available
+            load_directory($this->getInstaller()->getBasePath('database/seeds/'));
+
+            // Run package seeders
             foreach ($seeders as $seeder) {
                 try {
                     $seederFilename = substr($seeder, strrpos($seeder, '/') + 1);
-                    $this->getInstaller()->call('db:seed', [
+                    $this->getCommand()->call('db:seed', [
                         '--class' => substr($seederFilename, 0, strrpos($seederFilename, '.'))
                     ]);
                 } catch (Exception $e) {
-                    $this->getInstaller()->error(sprintf('Could not seed database. Reason: %s', $e->getMessage()));
+                    $this->getCommand()->error(sprintf('Could not seed database. Reason: %s', $e->getMessage()));
                 }
             }
         }
@@ -357,7 +371,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @param  array $data
      * @return void
      */
-    protected function copyFilesAndDirectories(array $data)
+    final protected function copyFilesAndDirectories(array $data)
     {
         foreach ($data as $from => $to) {
             // Prepare $from and $to paths
@@ -370,7 +384,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
             } elseif ($this->files->isDirectory($from)) {
                 $this->publishDirectory($from, $to);
             } else {
-                $this->getInstaller()->error(sprintf('Could not locate path: <%s>', $from));
+                $this->getCommand()->error(sprintf('Could not locate path: <%s>', $from));
             }
         }
     }
@@ -380,12 +394,12 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access private
+     * @access protected
      * @param  string $from
      * @param  string $to
      * @return void
      */
-    private function publishFile($from, $to)
+    final protected function publishFile($from, $to)
     {
         // If destination directory doesn't exist,
         // we'll create before copying the config files
@@ -398,7 +412,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         $this->files->copy($from, $to);
 
         // Output status message
-        $this->getInstaller()->line(
+        $this->getCommand()->line(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
                 'File', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
         );
@@ -409,11 +423,12 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param $from
-     * @param $to
+     * @access protected
+     * @param  string $from
+     * @param  string $to
      * @return void
      */
-    private function publishDirectory($from, $to)
+    final protected function publishDirectory($from, $to)
     {
         // Load mount manager
         $manager = new MountManager([
@@ -430,9 +445,36 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         }
 
         // Output status message
-        $this->getInstaller()->line(
+        $this->getCommand()->line(
             sprintf('<info>Copied %s</info> <comment>[%s]</comment> <info>To</info> <comment>[%s]</comment>',
                 'Directory', str_replace(base_path(), '', realpath($from)), str_replace(base_path(), '', realpath($to)))
+        );
+    }
+
+    /**
+     * callArtisanCommand
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @param  string $command
+     * @param  array $params
+     * @return integer
+     */
+    final protected function callArtisanCommand($command, array $params = [])
+    {
+        // Default input arguments
+        $inputArguments = ['NodesInstall', $command];
+
+        // Add artisan parameters to input arguments
+        if (!empty($params) && is_array($params)) {
+            $inputArguments[] = implode(' ', $params);
+        }
+
+        // Execute Artisan command
+        return $this->getInstaller()->getArtisan()->handle(
+            new SymfonyConsoleInput($inputArguments),
+            new SymfonyConsoleOutput
         );
     }
 
@@ -516,10 +558,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @param  \Illuminate\Console\Command $installer
+     * @param  \Nodes\Support\InstallPackage $installer
      * @return $this
      */
-    public function setInstaller(IlluminateConsoleCommand $installer)
+    public function setInstaller(NodesInstaller $installer)
     {
         $this->installer = $installer;
         return $this;
@@ -531,10 +573,38 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @return \Illuminate\Console\Command
+     * @return \Nodes\Support\InstallPackage
      */
     public function getInstaller()
     {
         return $this->installer;
+    }
+
+    /**
+     * Set current console command
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @param  \Illuminate\Console\Command $command
+     * @return $this
+     */
+    public function setCommand(IlluminateCommand $command)
+    {
+        $this->command = $command;
+        return $this;
+    }
+
+    /**
+     * Retrieve current console command
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return \Illuminate\Console\Command
+     */
+    public function getCommand()
+    {
+        return $this->command;
     }
 }
