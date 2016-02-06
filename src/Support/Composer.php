@@ -113,15 +113,10 @@ class Composer implements PluginInterface, ComposerEventSubscriberContract
 
         // Make sure Nodes core service provider
         // has been installed before bootstraping Artisan
-        $installedCoreServiceProvider = $this->nodesInstaller->addNodesServiceProvider();
+        $this->nodesInstaller->addNodesServiceProvider();
 
         // Bootstap Laravel and Artisan application
         $this->nodesInstaller->bootstrapLaravelArtisan();
-
-        // Run install sequence on core service provider
-        if ($installedCoreServiceProvider) {
-            $this->nodesInstaller->callArtisanCommand('nodes:package:install', ['nodes/core']);
-        }
 
         // Sort packages alphabetically
         ksort($this->packages);
