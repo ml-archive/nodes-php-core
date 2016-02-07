@@ -107,3 +107,40 @@ if (!function_exists('add_to_autoload_config')) {
         return true;
     }
 }
+
+if (!function_exists('add_to_composer_autoload')) {
+    /**
+     * Add key and/or value to Composer's autoload
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @param  string $section Section in Composer's autoload (i.e. classmap)
+     * @param  string $value   Value to add to $section
+     * @param  string $key     Key to pair with $value in $section
+     * @return void
+     */
+    function add_to_composer_autoload($section, $value, $key = null)
+    {
+        // File path to composer file
+        $composerFilePath = base_path('composer.json');
+
+        // Load and JSON decode composer file
+        $composerFile = json_decode(file_get_contents($composerFilePath));
+
+        // Make sure value doesn't already exists
+        if ((!is_null($key) && array_key_exists($key, $composerFile->autoload->{$section})) ||
+            in_array($value, $composerFile->autoload->{$section})) {
+            return;
+        }
+
+        // Add to composer's {section}
+        if (!is_null($key)) {
+            $composerFile->autoload->{$section}[$key] = $value;
+        } else {
+            $composerFile->autoload->{$section}[] = $value;
+        }
+
+        // Save changes to composer file
+        file_put_contents($composerFilePath, json_encode($composerFile, JSON_PRETTY_PRINT));
+    }
+}
