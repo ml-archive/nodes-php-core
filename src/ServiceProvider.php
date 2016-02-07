@@ -47,6 +47,21 @@ class ServiceProvider extends AbstractServiceProvider
     ];
 
     /**
+     * Boot the service provider
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return void
+     */
+    public function boot()
+    {
+        parent::boot();
+
+        $this->autoloadFilesAndDirectories();
+    }
+
+    /**
      * Register the service provider
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -96,5 +111,42 @@ class ServiceProvider extends AbstractServiceProvider
         $this->app->singleton(NodesUserAgentParser::class, function($app) {
             return $app['nodes.useragent'];
         });
+    }
+
+    /**
+     * Autoload files and directories
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return void
+     */
+    protected function autoloadFilesAndDirectories()
+    {
+        // Load files/directories from config file
+        $autoload = config('nodes.autoload', null);
+        if (empty($autoload)) {
+            return;
+        }
+
+        foreach ($autoload as $item) {
+            // Retrieve full path of item
+            $itemPath = base_path($item);
+
+            // If item doesn't exist, we'll skip it.
+            if (!file_exists($itemPath)) {
+                continue;
+            }
+
+            // If item is a file, we'll load it.
+            //
+            // If item is a directory, we'll recursively
+            // go through it and load all the files we find.
+            if (is_file($itemPath)) {
+                include_once $itemPath;
+            } else {
+                load_directory($itemPath);
+            }
+        }
     }
 }
