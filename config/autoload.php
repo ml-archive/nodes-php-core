@@ -11,5 +11,8 @@ return [
     | This is especially useful to load routes outside of Laravel's own
     | app/Http/routes.php file.
     |
+    | If path is a directory, always remember to add a trailing slash.
+    |
     */
+    // Paths should be relative to root folder
 ];

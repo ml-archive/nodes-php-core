@@ -349,7 +349,7 @@ class InstallPackage
             }
 
             for ($i = $locateAliasesArray[0]+1; $i < count($this->getApplicationConfig()); $i++) {
-                // Get value of next line
+                // Retrieve value of next line
                 $value = trim($this->getApplicationConfig()[$i]);
 
                 // If we're on an empty line, we'll continue to next one
