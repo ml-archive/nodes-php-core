@@ -18,7 +18,13 @@ class ServiceProvider extends AbstractServiceProvider
      */
     protected $package = 'core';
 
+    /**
+     * Array of configs to copy
+     *
+     * @var array
+     */
     protected $configs = [
+        'config/autoload.php' => 'config/nodes/autoload.php',
         'config/project.php' => 'config/nodes/project.php'
     ];
 
