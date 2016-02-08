@@ -156,6 +156,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         // Run install methods
         $this->prepareInstall();
         $this->installConfigs();
+        $this->installFacades();
         $this->installScaffolding();
         $this->installViews();
         $this->installAssets();
@@ -180,6 +181,24 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Copy config files to application
         $this->copyFilesAndDirectories($this->configs);
+    }
+
+    /**
+     * Install package facades
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return void
+     */
+    protected function installFacades()
+    {
+        if (empty($this->facades)) {
+            return;
+        }
+
+        // Install package facades
+        $this->getInstaller()->installFacades($this->getFacades());
     }
 
     /**
