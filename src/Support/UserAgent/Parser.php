@@ -44,7 +44,12 @@ class Parser
     public function __construct(Request $request)
     {
         // Retrieve user agent from request header
-        $this->userAgent = $userAgent = $request->header('User-Agent');
+        // X-User-Agent is supported since some browsers / platforms override User-Agent header
+        if($request->header('X-User-Agent')) {
+            $this->userAgent = $userAgent = $request->header('X-User-Agent');
+        } else {
+            $this->userAgent = $userAgent = $request->header('User-Agent');   
+        }
 
         // Parse received user agent
         $this->parse($userAgent);
