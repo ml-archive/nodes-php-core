@@ -150,6 +150,9 @@ class Exception extends CoreException implements HttpExceptionInterface
         // Set report state
         $this->setReport($report);
 
+        // Set serverity
+        $this->setSeverity($severity);
+
         // Set an empty message bag
         $this->setErrors(new MessageBag);
     }
