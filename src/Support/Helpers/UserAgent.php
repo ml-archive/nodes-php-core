@@ -9,7 +9,8 @@ if (!function_exists('nodes_user_agent')) {
      */
     function nodes_user_agent()
     {
-        return \NodesUserAgent::nodes();
+        $nodesUserAgent = app('nodes.useragent')->getNodesUserAgent();
+        return ($nodesUserAgent && $nodesUserAgent->success()) ? $nodesUserAgent : null;
     }
 }
 
@@ -19,10 +20,11 @@ if (!function_exists('user_agent')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @return \Nodes\Support\UserAgent\Agents\Original
+     * @return \Nodes\Support\UserAgent\Agents\Originalinull
      */
     function user_agent()
     {
-        return \NodesUserAgent::original();
+        $userAgent = app('nodes.useragent')->getOriginalUserAgent();
+        return ($userAgent && $userAgent->success()) ? $userAgent : null;
     }
 }

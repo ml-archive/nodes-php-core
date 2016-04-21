@@ -1,8 +1,10 @@
 <?php
 namespace Nodes;
 
+use BrowscapPHP\Cache\BrowscapCache;
 use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
-use phpbrowscap\Browscap;
+use BrowscapPHP\Browscap;
+use WurflCache\Adapter\File as CacheFile;
 
 /**
  * Class ServiceProvider
@@ -88,8 +90,18 @@ class ServiceProvider extends AbstractServiceProvider
     protected function registerBrowscap()
     {
         $this->app->singleton(Browscap::class, function($app) {
-            $browscap = new Browscap(storage_path('framework/cache'));
-            $browscap->remoteIniUrl = 'http://browscap.org/stream?q=PHP_BrowsCapINI';
+            $browscap = new Browscap;
+
+            // Cache for 90 days
+            $browscap->setCache(new BrowscapCache(
+                new CacheFile([
+                    CacheFile::DIR => storage_path('framework/browscap')
+                ])
+            ), 7776000);
+
+            // Automatically check for updates
+            $browscap->update();
+
             return $browscap;
         });
     }
