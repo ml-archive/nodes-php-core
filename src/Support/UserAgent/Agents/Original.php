@@ -1,6 +1,8 @@
 <?php
 namespace Nodes\Support\UserAgent\Agents;
-use phpbrowscap\Browscap;
+
+use Exception;
+use BrowscapPHP\Browscap;
 
 /**
  * Class Original
@@ -101,6 +103,13 @@ class Original
     protected $isCrawler = false;
 
     /**
+     * Indicator if parsing was successful or not
+     *
+     * @var boolean
+     */
+    protected $successful = false;
+
+    /**
      * Original constructor
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -117,11 +126,22 @@ class Original
         $this->parse();
     }
 
-
+    /**
+     * Parse user agent with the help from Browscap
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return void
+     */
     protected function parse()
     {
-        $data = app(Browscap::class)->getBrowser($this->userAgent);
-        //dd($data);
+        try {
+            $data = app(Browscap::class)->getBrowser($this->userAgent);
+        } catch (Exception $e) {
+            return;
+        }
+
         foreach ($data as $key => $value) {
             // Force lowercase on key
             $key = strtolower($key);
@@ -168,7 +188,10 @@ class Original
         // Set version and if major and minor
         // wasn't present in the data array
         // we'll set them as well
-        $this->setVersion($data->Version);
+        $this->setVersion($data->version);
+
+        // Mark parsing as successful
+        $this->successful = true;
     }
 
     /**
@@ -371,6 +394,19 @@ class Original
     public function isCrawler()
     {
         return $this->isCrawler;
+    }
+
+    /**
+     * Check if parsing of user agent was successful or not
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return boolean
+     */
+    public function success()
+    {
+        return $this->successful;
     }
 
     /**

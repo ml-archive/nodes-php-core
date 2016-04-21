@@ -65,6 +65,13 @@ class Nodes
     protected $device;
 
     /**
+     * Indicator if parsing was successful or not
+     *
+     * @var boolean
+     */
+    protected $successful = false;
+
+    /**
      * Nodes constructor
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -87,13 +94,13 @@ class Nodes
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @access public
-     * @return bool
+     * @return void
      */
     protected function parse()
     {
         // Parse Nodes user agent
         if (!preg_match('|Nodes/(.*)\s\((.*)\)|s', $this->userAgent, $match)) {
-            return false;
+            return;
         }
 
         // Put matches into their own variables
@@ -111,6 +118,9 @@ class Nodes
         if (!empty($parameters)) {
             $this->setParameters($parameters);
         }
+
+        // Mark parsing as successful
+        $this->successful = true;
     }
 
     /**
@@ -274,6 +284,19 @@ class Nodes
     public function getDevice()
     {
         return $this->device;
+    }
+
+    /**
+     * Check if parsing of user agent was successful or not
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access public
+     * @return boolean
+     */
+    public function success()
+    {
+        return $this->successful;
     }
 
     /**
