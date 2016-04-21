@@ -21,7 +21,7 @@
     "require": {
         "composer-plugin-api": "^1.0",
         "laravel/framework": "5.1.*||5.2.*",
-        "garetjax/phpbrowscap": "^2.0"
+        "browscap/browscap-php": "~3.0.0-rc.1"
     },
     "autoload": {
         "psr-4": {
