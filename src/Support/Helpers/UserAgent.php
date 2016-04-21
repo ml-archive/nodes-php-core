@@ -5,7 +5,7 @@ if (!function_exists('nodes_user_agent')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @return \Nodes\Support\UserAgent\Agents\Nodes
+     * @return \Nodes\Support\UserAgent\Agents\Nodes|null
      */
     function nodes_user_agent()
     {
@@ -20,7 +20,7 @@ if (!function_exists('user_agent')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @return \Nodes\Support\UserAgent\Agents\Originalinull
+     * @return \Nodes\Support\UserAgent\Agents\Original|null
      */
     function user_agent()
     {
