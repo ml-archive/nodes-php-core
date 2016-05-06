@@ -155,7 +155,7 @@ class ServiceProvider extends AbstractServiceProvider
             // If item is a directory, we'll recursively
             // go through it and load all the files we find.
             if (is_file($itemPath)) {
-                include_once $itemPath;
+                include $itemPath;
             } else {
                 load_directory($itemPath);
             }
