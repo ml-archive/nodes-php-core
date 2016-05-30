@@ -1,9 +1,10 @@
 <?php
 namespace Nodes;
 
-use BrowscapPHP\Cache\BrowscapCache;
-use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
 use BrowscapPHP\Browscap;
+use BrowscapPHP\Cache\BrowscapCache;
+use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
 use WurflCache\Adapter\File as CacheFile;
 
 /**
@@ -11,43 +12,8 @@ use WurflCache\Adapter\File as CacheFile;
  *
  * @package Nodes\Core
  */
-class ServiceProvider extends AbstractServiceProvider
+class ServiceProvider extends IlluminateServiceProvider
 {
-    /**
-     * Name of package
-     *
-     * @var string
-     */
-    protected $package = 'core';
-
-    /**
-     * Array of configs to copy
-     *
-     * @var array
-     */
-    protected $configs = [
-        'config/autoload.php' => 'config/nodes/autoload.php',
-        'config/project.php' => 'config/nodes/project.php'
-    ];
-
-    /**
-     * Register Artisan commands
-     *
-     * @var array
-     */
-    protected $commands = [
-        \Nodes\Console\Commands\InstallPackage::class
-    ];
-
-    /**
-     * Facades to install
-     *
-     * @var array
-     */
-    protected $facades = [
-        'NodesUserAgent' => \Nodes\Support\Facades\UserAgent::class
-    ];
-
     /**
      * Boot the service provider
      *
@@ -60,6 +26,7 @@ class ServiceProvider extends AbstractServiceProvider
     {
         parent::boot();
 
+        $this->publishGroups();
         $this->autoloadFilesAndDirectories();
     }
 
@@ -77,6 +44,23 @@ class ServiceProvider extends AbstractServiceProvider
 
         $this->registerBrowscap();
         $this->registerUserAgentParser();
+    }
+
+    /**
+     * Register publish groups
+     *
+     * @author Morten Rugaard <moru@nodes.dk>
+     *
+     * @access protected
+     * @return void
+     */
+    protected function publishGroups()
+    {
+        // Config files
+        $this->publishes([
+            __DIR__ . '/../config/autoload.php' => config_path('nodes/autoload.php'),
+            __DIR__ . '/../config/project.php' => config_path('nodes/project.php')
+        ], 'config');
     }
 
     /**
