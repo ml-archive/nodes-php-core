@@ -59,7 +59,7 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @const integer
      */
-    const ENTITY_NOT_FOUND = 445;
+    const ENTITY_NOT_FOUND = 550;
 
     /**
      * Status code
