@@ -40,8 +40,6 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function register()
     {
-        parent::register();
-
         $this->registerBrowscap();
         $this->registerUserAgentParser();
     }
