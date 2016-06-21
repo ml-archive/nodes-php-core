@@ -59,7 +59,7 @@ Setup alias in `config/app.php` (optional)
 Publish config files
 
 ```bash
-php artisan vendor:publish --provider="Nodes\Core\ServiceProvider"
+php artisan vendor:publish --provider="Nodes\ServiceProvider"
 ```
 
 If you want to overwrite any existing config files use the `--force` paramter
