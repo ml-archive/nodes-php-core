@@ -44,7 +44,13 @@ composer require nodes/core
 
 ## 🔧 Setup
 
-Setup alias in `config/app.php`
+Setup provider in `config/app.php`
+
+```php
+'Nodes\ServiceProvider::class,
+```
+
+Setup alias in `config/app.php` (optional)
 
 ```php
 'NodesUserAgent' => Nodes\Support\Facades\UserAgent::class,
