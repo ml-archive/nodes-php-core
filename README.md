@@ -65,7 +65,7 @@ php artisan vendor:publish --provider="Nodes\ServiceProvider"
 If you want to overwrite any existing config files use the `--force` paramter
 
 ```bash
-php artisan vendor:publish --provider="Nodes\Core\ServiceProvider" --force
+php artisan vendor:publish --provider="Nodes\ServiceProvider" --force
 ```
 
 ## 🏆 Credits
