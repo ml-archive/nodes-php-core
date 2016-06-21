@@ -47,7 +47,7 @@ composer require nodes/core
 Setup provider in `config/app.php`
 
 ```php
-'Nodes\ServiceProvider::class,
+Nodes\ServiceProvider::class,
 ```
 
 Setup alias in `config/app.php` (optional)
