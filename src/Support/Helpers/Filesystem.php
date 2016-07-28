@@ -1,18 +1,19 @@
 <?php
-if (!function_exists('load_directory')) {
+
+if (! function_exists('load_directory')) {
     /**
-     * Load all files in directory
+     * Load all files in directory.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  string  $path      Path to directory (must contain trailing slash)
-     * @param  boolean $recursive Load recursively
-     * @return boolean
+     * @param  bool $recursive Load recursively
+     * @return bool
      */
-    function load_directory($path, $recursive = true) {
+    function load_directory($path, $recursive = true)
+    {
         // Make sure directory exists
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return false;
         }
 
@@ -29,16 +30,16 @@ if (!function_exists('load_directory')) {
         foreach ($directory as $item) {
             // If item is a directory and recursive is false.
             // We'll simply skip the directory and move on.
-            if (is_dir($path . $item) && !$recursive) {
+            if (is_dir($path.$item) && ! $recursive) {
                 continue;
             }
 
-            if (is_dir($path . $item)) {
+            if (is_dir($path.$item)) {
                 // Load directory
-                load_directory($path . $item . '/');
+                load_directory($path.$item.'/');
             } else {
                 // Load file
-                include ($path . $item);
+                include $path.$item;
             }
         }
 

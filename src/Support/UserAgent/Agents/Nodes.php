@@ -1,82 +1,80 @@
 <?php
+
 namespace Nodes\Support\UserAgent\Agents;
 
 /**
- * Class Nodes
- *
- * @package Nodes\Support\UserAgent\Agents
+ * Class Nodes.
  */
 class Nodes
 {
     /**
-     * User agent
+     * User agent.
      *
      * @var string
      */
     protected $userAgent;
 
     /**
-     * Version number
+     * Version number.
      *
      * @var string
      */
     protected $version;
 
     /**
-     * Major version number
+     * Major version number.
      *
-     * @var integer
+     * @var int
      */
     protected $majorVersion;
 
     /**
-     * Minor version number
+     * Minor version number.
      *
-     * @var integer
+     * @var int
      */
     protected $minorVersion;
 
     /**
-     * Patch version number
+     * Patch version number.
      *
      * @var string
      */
     protected $patchVersion;
 
     /**
-     * Debug mode
+     * Debug mode.
      *
-     * @var boolean
+     * @var bool
      */
     protected $debug;
 
     /**
-     * Platfrom name and verison
+     * Platfrom name and verison.
      *
      * @var string
      */
     protected $platform;
 
     /**
-     * Device name
+     * Device name.
      *
      * @var string
      */
     protected $device;
 
     /**
-     * Indicator if parsing was successful or not
+     * Indicator if parsing was successful or not.
      *
-     * @var boolean
+     * @var bool
      */
     protected $successful = false;
 
     /**
-     * Nodes constructor
+     * Nodes constructor.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  string  $userAgent
      */
     public function __construct($userAgent)
@@ -89,17 +87,16 @@ class Nodes
     }
 
     /**
-     * Parse user agent string
+     * Parse user agent string.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return void
      */
     protected function parse()
     {
         // Parse Nodes user agent
-        if (!preg_match('|Nodes/(.*)\s\((.*)\)|s', $this->userAgent, $match)) {
+        if (! preg_match('|Nodes/(.*)\s\((.*)\)|s', $this->userAgent, $match)) {
             return;
         }
 
@@ -110,12 +107,12 @@ class Nodes
         $parameters = explode(',', $parameters);
 
         // Set version if available
-        if (!empty($version)) {
+        if (! empty($version)) {
             $this->setVersion($version);
         }
 
         // Set parameters if available
-        if (!empty($parameters)) {
+        if (! empty($parameters)) {
             $this->setParameters($parameters);
         }
 
@@ -124,11 +121,10 @@ class Nodes
     }
 
     /**
-     * Set version
+     * Set version.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  string $version
      * @return $this
      */
@@ -152,11 +148,10 @@ class Nodes
     }
 
     /**
-     * Set parameters
+     * Set parameters.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  array $parameters
      * @return $this
      */
@@ -183,11 +178,10 @@ class Nodes
     }
 
     /**
-     * Retrieve user agent string
+     * Retrieve user agent string.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getUserAgent()
@@ -196,11 +190,10 @@ class Nodes
     }
 
     /**
-     * Retrieve version number
+     * Retrieve version number.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getVersion()
@@ -209,12 +202,11 @@ class Nodes
     }
 
     /**
-     * Retrieve major version number
+     * Retrieve major version number.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return integer
+     * @return int
      */
     public function getMajorVersion()
     {
@@ -222,12 +214,11 @@ class Nodes
     }
 
     /**
-     * Retrieve minor version number
+     * Retrieve minor version number.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return integer
+     * @return int
      */
     public function getMinorVersion()
     {
@@ -235,12 +226,11 @@ class Nodes
     }
 
     /**
-     * Retrieve patch version number
+     * Retrieve patch version number.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return integer
+     * @return int
      */
     public function getPatchVersion()
     {
@@ -248,12 +238,11 @@ class Nodes
     }
 
     /**
-     * Retrieve debug mode
+     * Retrieve debug mode.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return boolean
+     * @return bool
      */
     public function getDebug()
     {
@@ -261,11 +250,10 @@ class Nodes
     }
 
     /**
-     * Retrieve platform name and version
+     * Retrieve platform name and version.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getPlatform()
@@ -274,11 +262,10 @@ class Nodes
     }
 
     /**
-     * Retrieve device name
+     * Retrieve device name.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getDevice()
@@ -287,12 +274,11 @@ class Nodes
     }
 
     /**
-     * Check if parsing of user agent was successful or not
+     * Check if parsing of user agent was successful or not.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return boolean
+     * @return bool
      */
     public function success()
     {
@@ -300,7 +286,7 @@ class Nodes
     }
 
     /**
-     * toArray
+     * toArray.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
      *
@@ -316,7 +302,7 @@ class Nodes
             'patchVersion' => $this->patchVersion,
             'debug' => $this->debug,
             'platform' => $this->platform,
-            'device' => $this->device
+            'device' => $this->device,
         ];
     }
 }
