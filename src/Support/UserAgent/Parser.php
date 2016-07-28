@@ -1,4 +1,5 @@
 <?php
+
 namespace Nodes\Support\UserAgent;
 
 use Illuminate\Http\Request;
@@ -6,39 +7,36 @@ use Nodes\Support\UserAgent\Agents\Nodes as NodesUserAgent;
 use Nodes\Support\UserAgent\Agents\Original as OriginalUserAgent;
 
 /**
- * Class Parser
- *
- * @package Nodes\Support\UserAgent
+ * Class Parser.
  */
 class Parser
 {
     /**
-     * User agent received from request header
+     * User agent received from request header.
      *
      * @var string
      */
     protected $userAgent;
 
     /**
-     * Original user agent
+     * Original user agent.
      *
      * @var string
      */
     protected $originalUserAgent;
 
     /**
-     * Nodes user agent
+     * Nodes user agent.
      *
      * @var string
      */
     protected $nodesUserAgent;
 
     /**
-     * UserAgent constructor
+     * UserAgent constructor.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param \Illuminate\Http\Request $request
      */
     public function __construct(Request $request)
@@ -52,11 +50,10 @@ class Parser
     }
 
     /**
-     * Parse received user agent
+     * Parse received user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @param  string $userAgent
      * @return void
      */
@@ -77,20 +74,19 @@ class Parser
             $this->parseNodesUserAgent($nodesUserAgent);
 
             // Chop off the Nodes user agent from the received user agent
-            $originalUserAgent = substr($userAgent, 0, $nodesUAPosition-1);
+            $originalUserAgent = substr($userAgent, 0, $nodesUAPosition - 1);
         }
 
         $this->parseOriginalUserAgent($originalUserAgent);
     }
 
     /**
-     * Parse Nodes user agent
+     * Parse Nodes user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  string $nodesUserAgent
-     * @return \Nodes\Support\UserAgent\Agents\Nodes|boolean
+     * @return \Nodes\Support\UserAgent\Agents\Nodes|bool
      */
     protected function parseNodesUserAgent($nodesUserAgent)
     {
@@ -98,11 +94,10 @@ class Parser
     }
 
     /**
-     * Parse original user agent
+     * Parse original user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @param  string $originalUserAgent
      * @return \Nodes\Support\UserAgent\Agents\Original
      */
@@ -112,11 +107,10 @@ class Parser
     }
 
     /**
-     * Retrieve Nodes user agent
+     * Retrieve Nodes user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getNodesUserAgent()
@@ -125,11 +119,10 @@ class Parser
     }
 
     /**
-     * Retrieve original user agent
+     * Retrieve original user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getOriginalUserAgent()

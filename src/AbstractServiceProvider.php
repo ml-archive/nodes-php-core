@@ -1,4 +1,5 @@
 <?php
+
 namespace Nodes;
 
 use Exception;
@@ -14,103 +15,101 @@ use Symfony\Component\Console\Input\ArgvInput as SymfonyConsoleInput;
 use Symfony\Component\Console\Output\ConsoleOutput as SymfonyConsoleOutput;
 
 /**
- * Class ServiceProvider
+ * Class ServiceProvider.
  *
  * @abstract
- * @package Nodes\Core
  */
 abstract class AbstractServiceProvider extends IlluminateServiceProvider
 {
     /**
-     * Vendor name
+     * Vendor name.
      *
      * @var string
      */
     protected $vendor = 'nodes';
 
     /**
-     * Package name
+     * Package name.
      *
      * @var string|null
      */
     protected $package = null;
 
     /**
-     * Facades to install
+     * Facades to install.
      *
      * @var array
      */
     protected $facades = [];
 
     /**
-     * Artisan commands to register
+     * Artisan commands to register.
      *
      * @var array
      */
     protected $commands = [];
 
     /**
-     * Array of configs to copy
+     * Array of configs to copy.
      *
      * @var array
      */
     protected $configs = [];
 
     /**
-     * Array of views to copy
+     * Array of views to copy.
      *
      * @var array
      */
     protected $views = [];
 
     /**
-     * Array of assets to copy
+     * Array of assets to copy.
      *
      * @var array
      */
     protected $assets = [];
 
     /**
-     * Array of migrations to copy
+     * Array of migrations to copy.
      *
      * @var array
      */
     protected $migrations = [];
 
     /**
-     * Array of seeders to copy
+     * Array of seeders to copy.
      *
      * @var array
      */
     protected $seeders = [];
 
     /**
-     * The filesystem instance
+     * The filesystem instance.
      *
      * @var \Illuminate\Filesystem\Filesystem
      */
     protected $files;
 
     /**
-     * Nodes installer
+     * Nodes installer.
      *
      * @var \Nodes\Support\InstallPackage
      */
     protected $installer;
 
     /**
-     * Current console command
+     * Current console command.
      *
      * @var \Illuminate\Console\Command
      */
     protected $command;
 
     /**
-     * Register the service provider
+     * Register the service provider.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return void
      */
     public function register()
@@ -119,26 +118,25 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Register Artisan Commands
+     * Register Artisan Commands.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return $this
      */
     public function registerCommands()
     {
         $this->commands($this->commands);
+
         return $this;
     }
 
     /**
-     * Install service provider
+     * Install service provider.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @access public
      * @return void
      * @throws \Nodes\Exceptions\InstallPackageException
      */
@@ -166,11 +164,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Copy configs to application
+     * Copy configs to application.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function installConfigs()
@@ -184,11 +181,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Install package facades
+     * Install package facades.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function installFacades()
@@ -202,11 +198,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Copy views to application
+     * Copy views to application.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function installViews()
@@ -220,11 +215,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Copy assets to application
+     * Copy assets to application.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function installAssets()
@@ -238,11 +232,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Install database migrations and seeders
+     * Install database migrations and seeders.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function installDatabase()
@@ -253,11 +246,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Install database migration files
+     * Install database migration files.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function installDatabaseMigrations()
@@ -271,11 +263,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Install database seeder files
+     * Install database seeder files.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function installDatabaseSeeders()
@@ -289,60 +280,63 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Install scaffolding
+     * Install scaffolding.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @abstract
-     * @access protected
      * @return void
      */
-    protected function installScaffolding() {}
+    protected function installScaffolding()
+    {
+    }
 
     /**
-     * Install custom stuff
+     * Install custom stuff.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @abstract
-     * @access protected
      * @return void
      */
-    protected function installCustom() {}
+    protected function installCustom()
+    {
+    }
 
     /**
-     * Prepare install
+     * Prepare install.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
-    protected function prepareInstall() {}
+    protected function prepareInstall()
+    {
+    }
 
     /**
-     * Finish install
+     * Finish install.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return void
      */
-    protected function finishInstall() {}
+    protected function finishInstall()
+    {
+    }
 
     /**
-     * Run database migrations and seeders
+     * Run database migrations and seeders.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     final protected function runDatabaseMigrationsAndSeeders()
     {
         // Ask to migrate the database,
         // if we've copied any migration files to the application.
-        if (!empty($this->migrations) && $this->getCommand()->confirm('Do you wish to migrate your database?', true)) {
+        if (! empty($this->migrations) && $this->getCommand()->confirm('Do you wish to migrate your database?', true)) {
             try {
                 $this->getCommand()->call('migrate');
             } catch (Exception $e) {
@@ -363,7 +357,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Ask to seed the database,
         // if we've copied any migration files to the application.
-        if (!empty($seeders) && $this->getCommand()->confirm('Do you wish to seed your database?', true)) {
+        if (! empty($seeders) && $this->getCommand()->confirm('Do you wish to seed your database?', true)) {
             // Load seeders directory so new seeders are available
             load_directory($this->getInstaller()->getBasePath('database/seeds/'));
 
@@ -372,7 +366,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
                 try {
                     $seederFilename = substr($seeder, strrpos($seeder, '/') + 1);
                     $this->getCommand()->call('db:seed', [
-                        '--class' => substr($seederFilename, 0, strrpos($seederFilename, '.'))
+                        '--class' => substr($seederFilename, 0, strrpos($seederFilename, '.')),
                     ]);
                 } catch (Exception $e) {
                     $this->getCommand()->error(sprintf('Could not seed database. Reason: %s', $e->getMessage()));
@@ -382,11 +376,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Copy files and/or directories to application
+     * Copy files and/or directories to application.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @param  array $data
      * @return void
      */
@@ -409,11 +402,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Publish file to application
+     * Publish file to application.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @param  string $from
      * @param  string $to
      * @return void
@@ -423,7 +415,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         // If destination directory doesn't exist,
         // we'll create before copying the config files
         $directoryDestination = dirname($to);
-        if (!$this->files->isDirectory($directoryDestination)) {
+        if (! $this->files->isDirectory($directoryDestination)) {
             $this->files->makeDirectory($directoryDestination, 0755, true);
         }
 
@@ -438,11 +430,10 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Publish directory to application
+     * Publish directory to application.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @param  string $from
      * @param  string $to
      * @return void
@@ -471,14 +462,13 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * callArtisanCommand
+     * callArtisanCommand.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @param  string $command
      * @param  array $params
-     * @return integer
+     * @return int
      */
     final protected function callArtisanCommand($command, array $params = [])
     {
@@ -486,7 +476,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         $inputArguments = ['NodesInstall', $command];
 
         // Add artisan parameters to input arguments
-        if (!empty($params) && is_array($params)) {
+        if (! empty($params) && is_array($params)) {
             $inputArguments[] = implode(' ', $params);
         }
 
@@ -498,28 +488,27 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Set vendor name
+     * Set vendor name.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @access public
      * @param  string $vendor
      * @return $this
      */
     final public function setVendor($vendor)
     {
         $this->vendor = $vendor;
+
         return $this;
     }
 
     /**
-     * Retrieve vendor name
+     * Retrieve vendor name.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @access public
      * @return string
      */
     final public function getVendor()
@@ -528,28 +517,27 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Set package name
+     * Set package name.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @access public
      * @param  string $package
      * @return $this
      */
     final public function setPackage($package)
     {
         $this->package = $package;
+
         return $this;
     }
 
     /**
-     * Retrieve package name
+     * Retrieve package name.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @access public
      * @return string|null
      */
     final public function getPackage()
@@ -558,12 +546,11 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Retrieve facades to install
+     * Retrieve facades to install.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @access public
      * @return array
      */
     final public function getFacades()
@@ -572,26 +559,25 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Set installer instance
+     * Set installer instance.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  \Nodes\Support\InstallPackage $installer
      * @return $this
      */
     public function setInstaller(NodesInstaller $installer)
     {
         $this->installer = $installer;
+
         return $this;
     }
 
     /**
-     * Retrieve installer instance
+     * Retrieve installer instance.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return \Nodes\Support\InstallPackage
      */
     public function getInstaller()
@@ -600,26 +586,25 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Set current console command
+     * Set current console command.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  \Illuminate\Console\Command $command
      * @return $this
      */
     public function setCommand(IlluminateCommand $command)
     {
         $this->command = $command;
+
         return $this;
     }
 
     /**
-     * Retrieve current console command
+     * Retrieve current console command.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return \Illuminate\Console\Command
      */
     public function getCommand()

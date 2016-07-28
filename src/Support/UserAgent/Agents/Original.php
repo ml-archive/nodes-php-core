@@ -1,120 +1,118 @@
 <?php
+
 namespace Nodes\Support\UserAgent\Agents;
 
 use Exception;
 use BrowscapPHP\Browscap;
 
 /**
- * Class Original
- *
- * @package Nodes\Support\UserAgent\Agents
+ * Class Original.
  */
 class Original
 {
     /**
-     * User agent
+     * User agent.
      *
      * @var string
      */
     protected $userAgent;
 
     /**
-     * Browser name
+     * Browser name.
      *
      * @var string
      */
     protected $browser;
 
     /**
-     * Browser version
+     * Browser version.
      *
-     * @var integer
+     * @var int
      */
     protected $version = 0;
 
     /**
-     * Browser major version
+     * Browser major version.
      *
-     * @var integer
+     * @var int
      */
     protected $majorVersion = 0;
 
     /**
-     * Browser minor version
+     * Browser minor version.
      *
-     * @var integer
+     * @var int
      */
     protected $minorVersion = 0;
 
     /**
-     * Browser with version
+     * Browser with version.
      *
      * @var string
      */
     protected $browserWithVersion;
 
     /**
-     * Browser publisher
+     * Browser publisher.
      *
      * @var string
      */
     protected $publisher;
 
     /**
-     * Platform name
+     * Platform name.
      *
      * @var string
      */
     protected $platform;
 
     /**
-     * Device name
+     * Device name.
      *
      * @var string
      */
     protected $device;
 
     /**
-     * Device pointing method
+     * Device pointing method.
      *
      * @var string
      */
     protected $devicePointer;
 
     /**
-     * Did request come from a mobile
+     * Did request come from a mobile.
      *
-     * @var boolean
+     * @var bool
      */
     protected $isMobile = false;
 
     /**
-     * Did request come from a tablet
+     * Did request come from a tablet.
      *
-     * @var boolean
+     * @var bool
      */
     protected $isTablet = false;
 
     /**
-     * Did request come from a crawler
+     * Did request come from a crawler.
      *
-     * @var boolean
+     * @var bool
      */
     protected $isCrawler = false;
 
     /**
-     * Indicator if parsing was successful or not
+     * Indicator if parsing was successful or not.
      *
-     * @var boolean
+     * @var bool
      */
     protected $successful = false;
 
     /**
-     * Original constructor
+     * Original constructor.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @param  string $userAgent
      */
     public function __construct($userAgent)
@@ -127,11 +125,10 @@ class Original
     }
 
     /**
-     * Parse user agent with the help from Browscap
+     * Parse user agent with the help from Browscap.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return void
      */
     protected function parse()
@@ -152,13 +149,13 @@ class Original
             // Switch it up!
             switch ($key) {
                 case 'ismobiledevice':
-                    $this->isMobile = !empty($value);
+                    $this->isMobile = ! empty($value);
                     break;
                 case 'istablet':
-                    $this->isTablet = !empty($value);
+                    $this->isTablet = ! empty($value);
                     break;
                 case 'crawler':
-                    $this->isCrawler = !empty($value);
+                    $this->isCrawler = ! empty($value);
                     break;
                 case 'majorver':
                     $this->majorVersion = (int) $value;
@@ -195,11 +192,10 @@ class Original
     }
 
     /**
-     * Set version of browser
+     * Set version of browser.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @param  string $version
      * @return $this
      */
@@ -228,11 +224,10 @@ class Original
     }
 
     /**
-     * Retrieve user agent string
+     * Retrieve user agent string.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getUserAgent()
@@ -241,11 +236,10 @@ class Original
     }
 
     /**
-     * Retrieve browser name
+     * Retrieve browser name.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getBrowser()
@@ -254,12 +248,11 @@ class Original
     }
 
     /**
-     * Retrieve browser version
+     * Retrieve browser version.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return integer
+     * @return int
      */
     public function getVersion()
     {
@@ -267,12 +260,11 @@ class Original
     }
 
     /**
-     * Retrieve browser's major version
+     * Retrieve browser's major version.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return integer
+     * @return int
      */
     public function getMajorVersion()
     {
@@ -280,12 +272,11 @@ class Original
     }
 
     /**
-     * Retrieve browser's minor version
+     * Retrieve browser's minor version.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return integer
+     * @return int
      */
     public function getMinorVersion()
     {
@@ -293,11 +284,10 @@ class Original
     }
 
     /**
-     * Retrieve browser with version
+     * Retrieve browser with version.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getBrowserWithVersion()
@@ -306,11 +296,10 @@ class Original
     }
 
     /**
-     * Retrieve browser publisher
+     * Retrieve browser publisher.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getPublisher()
@@ -319,11 +308,10 @@ class Original
     }
 
     /**
-     * Retrieve platform
+     * Retrieve platform.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getPlatform()
@@ -332,11 +320,10 @@ class Original
     }
 
     /**
-     * Retrieve device type
+     * Retrieve device type.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getDevice()
@@ -345,11 +332,10 @@ class Original
     }
 
     /**
-     * Retrieve device pointing method
+     * Retrieve device pointing method.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return string
      */
     public function getDevicePointer()
@@ -358,12 +344,11 @@ class Original
     }
 
     /**
-     * Did request come from a mobile
+     * Did request come from a mobile.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return boolean
+     * @return bool
      */
     public function isMobile()
     {
@@ -371,12 +356,11 @@ class Original
     }
 
     /**
-     * Did request come from a tablet
+     * Did request come from a tablet.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return boolean
+     * @return bool
      */
     public function isTablet()
     {
@@ -384,12 +368,11 @@ class Original
     }
 
     /**
-     * Did request come from a crawler
+     * Did request come from a crawler.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return boolean
+     * @return bool
      */
     public function isCrawler()
     {
@@ -397,12 +380,11 @@ class Original
     }
 
     /**
-     * Check if parsing of user agent was successful or not
+     * Check if parsing of user agent was successful or not.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
-     * @return boolean
+     * @return bool
      */
     public function success()
     {
@@ -410,13 +392,14 @@ class Original
     }
 
     /**
-     * toArray
+     * toArray.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
      *
      * @return array
      */
-    public function toArray() {
+    public function toArray()
+    {
         return [
             'userAgent' => $this->userAgent,
             'browser' => $this->browser,
@@ -430,7 +413,7 @@ class Original
             'devicePointer' => $this->devicePointer,
             'isMobile' => $this->isMobile,
             'isTablet' => $this->isTablet(),
-            'isCrawler' => $this->isCrawler
+            'isCrawler' => $this->isCrawler,
         ];
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Nodes;
 
 use BrowscapPHP\Browscap;
@@ -8,18 +9,15 @@ use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
 use WurflCache\Adapter\File as CacheFile;
 
 /**
- * Class ServiceProvider
- *
- * @package Nodes\Core
+ * Class ServiceProvider.
  */
 class ServiceProvider extends IlluminateServiceProvider
 {
     /**
-     * Boot the service provider
+     * Boot the service provider.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return void
      */
     public function boot()
@@ -31,11 +29,10 @@ class ServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Register the service provider
+     * Register the service provider.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return void
      */
     public function register()
@@ -45,39 +42,37 @@ class ServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Register publish groups
+     * Register publish groups.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function publishGroups()
     {
         // Config files
         $this->publishes([
-            __DIR__ . '/../config/autoload.php' => config_path('nodes/autoload.php'),
-            __DIR__ . '/../config/project.php' => config_path('nodes/project.php')
+            __DIR__.'/../config/autoload.php' => config_path('nodes/autoload.php'),
+            __DIR__.'/../config/project.php' => config_path('nodes/project.php'),
         ], 'config');
     }
 
     /**
-     * Register browscap
+     * Register browscap.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access public
      * @return void
      */
     protected function registerBrowscap()
     {
-        $this->app->singleton(Browscap::class, function($app) {
+        $this->app->singleton(Browscap::class, function ($app) {
             $browscap = new Browscap;
 
             // Cache for 90 days
             $browscap->setCache(new BrowscapCache(
                 new CacheFile([
-                    CacheFile::DIR => storage_path('framework/browscap')
+                    CacheFile::DIR => storage_path('framework/browscap'),
                 ])
             ), 7776000);
 
@@ -89,30 +84,28 @@ class ServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Register user agent parser
+     * Register user agent parser.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function registerUserAgentParser()
     {
-        $this->app->bind('nodes.useragent', function($app) {
+        $this->app->bind('nodes.useragent', function ($app) {
             return new NodesUserAgentParser($app['request']);
         });
 
-        $this->app->singleton(NodesUserAgentParser::class, function($app) {
+        $this->app->singleton(NodesUserAgentParser::class, function ($app) {
             return $app['nodes.useragent'];
         });
     }
 
     /**
-     * Autoload files and directories
+     * Autoload files and directories.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @access protected
      * @return void
      */
     protected function autoloadFilesAndDirectories()
@@ -128,7 +121,7 @@ class ServiceProvider extends IlluminateServiceProvider
             $itemPath = base_path($item);
 
             // If item doesn't exist, we'll skip it.
-            if (!file_exists($itemPath)) {
+            if (! file_exists($itemPath)) {
                 continue;
             }
 

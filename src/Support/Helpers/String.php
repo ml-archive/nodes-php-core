@@ -1,5 +1,6 @@
 <?php
-if (!function_exists('add_trailing_slash')) {
+
+if (! function_exists('add_trailing_slash')) {
     /**
      * Add trailing slash to string if missing.
      *
@@ -18,7 +19,7 @@ if (!function_exists('add_trailing_slash')) {
     }
 }
 
-if (!function_exists('remove_trailing_slash')) {
+if (! function_exists('remove_trailing_slash')) {
     /**
      * Remove trailing slash from string if present.
      *

@@ -1,5 +1,6 @@
 <?php
-if (!function_exists('prepare_config_instances')) {
+
+if (! function_exists('prepare_config_instances')) {
     /**
      * Prepare an array of instantiable configuration instances.
      *
@@ -21,7 +22,7 @@ if (!function_exists('prepare_config_instances')) {
     }
 }
 
-if (!function_exists('prepare_config_instance')) {
+if (! function_exists('prepare_config_instance')) {
     /**
      * Prepare an instantiable configuration instance.
      *
@@ -42,9 +43,9 @@ if (!function_exists('prepare_config_instance')) {
     }
 }
 
-if (!function_exists('add_to_autoload_config')) {
+if (! function_exists('add_to_autoload_config')) {
     /**
-     * Add path to Nodes autoload config
+     * Add path to Nodes autoload config.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
@@ -57,7 +58,7 @@ if (!function_exists('add_to_autoload_config')) {
         $autoloadPath = config_path('nodes/autoload.php');
 
         // Make sure autoload config exists
-        if (!file_exists($autoloadPath)) {
+        if (! file_exists($autoloadPath)) {
             return false;
         }
 
@@ -66,10 +67,10 @@ if (!function_exists('add_to_autoload_config')) {
 
         // Determine line in config file to start adding from
         $lookForStartingPosition = array_keys(preg_grep('|// Paths should be relative to root folder|i', $autoloadConfig));
-        $startPosition = !empty($lookForStartingPosition[0]) ? (int) $lookForStartingPosition[0]+1 : 2;
+        $startPosition = ! empty($lookForStartingPosition[0]) ? (int) $lookForStartingPosition[0] + 1 : 2;
 
         // Make paths is always an array
-        $paths = !is_array($paths) ? [$paths] : $paths;
+        $paths = ! is_array($paths) ? [$paths] : $paths;
 
         foreach ($paths as $path) {
             // Wrap path in single quotes
@@ -95,7 +96,7 @@ if (!function_exists('add_to_autoload_config')) {
 
                 // Insert path at current line
                 array_splice($autoloadConfig, $i, 0, [
-                    str_repeat(' ', 4) . $path . ",\n"
+                    str_repeat(' ', 4).$path.",\n",
                 ]);
                 break;
             }
@@ -108,9 +109,9 @@ if (!function_exists('add_to_autoload_config')) {
     }
 }
 
-if (!function_exists('add_to_composer_autoload')) {
+if (! function_exists('add_to_composer_autoload')) {
     /**
-     * Add key and/or value to Composer's autoload
+     * Add key and/or value to Composer's autoload.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
@@ -128,13 +129,13 @@ if (!function_exists('add_to_composer_autoload')) {
         $composerFile = json_decode(file_get_contents($composerFilePath));
 
         // Make sure value doesn't already exists
-        if ((!is_null($key) && array_key_exists($key, $composerFile->autoload->{$section})) ||
+        if ((! is_null($key) && array_key_exists($key, $composerFile->autoload->{$section})) ||
             in_array($value, $composerFile->autoload->{$section})) {
             return;
         }
 
         // Add to composer's {section}
-        if (!is_null($key)) {
+        if (! is_null($key)) {
             $composerFile->autoload->{$section}[$key] = $value;
         } else {
             $composerFile->autoload->{$section}[] = $value;
