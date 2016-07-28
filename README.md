@@ -10,6 +10,7 @@ The main package used by most Nodes packages.
 [![Star repository on GitHub](https://img.shields.io/github/stars/nodes-php/core.svg?style=social&label=Star)](https://github.com/nodes-php/core/stargazers)
 [![Watch repository on GitHub](https://img.shields.io/github/watchers/nodes-php/core.svg?style=social&label=Watch)](https://github.com/nodes-php/core/watchers)
 [![Fork repository on GitHub](https://img.shields.io/github/forks/nodes-php/core.svg?style=social&label=Fork)](https://github.com/nodes-php/core/network)
+[![StyleCI](https://styleci.io/repos/45786039/shield)](https://styleci.io/repos/45786039)
 
 ## 📝 Introduction
 This package is what we in Nodes call the "Core" package. It consists of a lot of helpful methods, which makes it easier to develop other packages and projects in general.
