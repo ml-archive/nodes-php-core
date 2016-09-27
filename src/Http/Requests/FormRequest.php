@@ -8,7 +8,6 @@ use Nodes\Validation\Exceptions\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Http\FormRequest as IlluminateFormRequest;
 
-
 /**
  * Class Request
  */
