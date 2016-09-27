@@ -22,8 +22,6 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function boot()
     {
-        parent::boot();
-
         $this->publishGroups();
         $this->autoloadFilesAndDirectories();
     }
