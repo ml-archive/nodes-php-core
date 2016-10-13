@@ -34,6 +34,6 @@ class QueueMonitorJob implements ShouldQueue
      */
     public function handle()
     {
-        (new Client())->patchAsync('https://nstack2.like.st/api/queues/monitors/' . $this->queueName);
+        (new Client())->patch('https://nstack2.like.st/api/queues/monitors/' . $this->queueName);
     }
 }
