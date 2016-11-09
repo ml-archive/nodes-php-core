@@ -3,9 +3,7 @@
 namespace Nodes\Exceptions;
 
 /**
- * Class BadRequestException
- *
- * @package Nodes\Exceptions
+ * Class BadRequestException.
  */
 class BadRequestException extends Exception
 {
