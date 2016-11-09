@@ -3,17 +3,14 @@
 namespace Nodes\Exceptions;
 
 /**
- * Class BadRequestException
- *
- * @package Nodes\Exceptions
+ * Class BadRequestException.
  */
 class BadRequestException extends Exception
 {
     /**
-     * BadRequestException constructor
+     * BadRequestException constructor.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
      *
      * @param string $message
      */

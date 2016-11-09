@@ -1,10 +1,11 @@
 <?php
 
-if ( ! function_exists('nodes_user_agent')) {
+if (!function_exists('nodes_user_agent')) {
     /**
      * Retrieve Nodes user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
+     *
      * @return \Nodes\Support\UserAgent\Agents\Nodes|null
      * @deprecated
      */
@@ -16,12 +17,12 @@ if ( ! function_exists('nodes_user_agent')) {
     }
 }
 
-if ( ! function_exists('nodes_meta')) {
+if (!function_exists('nodes_meta')) {
     /**
-     * nodes_meta
+     * nodes_meta.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return Nodes\Support\UserAgent\Agents\Meta|null
      */
     function nodes_meta()
@@ -30,11 +31,12 @@ if ( ! function_exists('nodes_meta')) {
     }
 }
 
-if ( ! function_exists('user_agent')) {
+if (!function_exists('user_agent')) {
     /**
      * Retrieve original user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
+     *
      * @return \Nodes\Support\UserAgent\Agents\Original|null
      */
     function user_agent()

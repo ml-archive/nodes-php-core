@@ -85,10 +85,9 @@ class Meta
     ];
 
     /**
-     * Meta constructor
+     * Meta constructor.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
      *
      * @param $header
      *
@@ -99,7 +98,7 @@ class Meta
         $headerArr = explode(';', $header);
 
         // Parse platform
-        if ( ! isset($headerArr[0]) || ! in_array($headerArr[0], self::PLATFORMS)) {
+        if (!isset($headerArr[0]) || !in_array($headerArr[0], self::PLATFORMS)) {
             throw new BadRequestException('Platform is not supported, should be: '.implode(',', self::PLATFORMS));
         }
 
@@ -111,32 +110,32 @@ class Meta
         }
 
         // Parse env
-        if ( ! isset($headerArr[1]) || ! in_array($headerArr[1], self::ENVIRONMENTS)) {
+        if (!isset($headerArr[1]) || !in_array($headerArr[1], self::ENVIRONMENTS)) {
             throw new BadRequestException('Environment is not supported, should be: '.implode(',', self::ENVIRONMENTS));
         }
 
         $this->environment = $headerArr[1];
 
         // Parse Build number
-        if ( ! isset($headerArr[2])) {
+        if (!isset($headerArr[2])) {
             throw new BadRequestException('Missing version');
         }
 
-        $this->version      = $headerArr[2];
-        $versionArr         = explode('.', $this->version);
+        $this->version = $headerArr[2];
+        $versionArr = explode('.', $this->version);
         $this->majorVersion = isset($versionArr[0]) ? $versionArr[0] : 0;
         $this->minorVersion = isset($versionArr[1]) ? $versionArr[1] : 0;
         $this->patchVersion = isset($versionArr[2]) ? $versionArr[2] : 0;
 
         // Parse device os version
-        if ( ! isset($headerArr[3])) {
+        if (!isset($headerArr[3])) {
             throw new BadRequestException('Missing device os version');
         }
 
         $this->deviceOsVersion = $headerArr[3];
 
         // Parse device
-        if ( ! isset($headerArr[4])) {
+        if (!isset($headerArr[4])) {
             throw new BadRequestException('Missing device');
         }
 
@@ -144,10 +143,10 @@ class Meta
     }
 
     /**
-     * Retrieve platform
+     * Retrieve platform.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return string
      */
     public function getPlatform()
@@ -156,10 +155,10 @@ class Meta
     }
 
     /**
-     * Retrieve environment
+     * Retrieve environment.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return string
      */
     public function getEnvironment()
@@ -168,10 +167,10 @@ class Meta
     }
 
     /**
-     * Retrieve version
+     * Retrieve version.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return string
      */
     public function getVersion()
@@ -180,10 +179,10 @@ class Meta
     }
 
     /**
-     * Retrieve majorVersion
+     * Retrieve majorVersion.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return int
      */
     public function getMajorVersion()
@@ -192,10 +191,10 @@ class Meta
     }
 
     /**
-     * Retrieve minorVersion
+     * Retrieve minorVersion.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return int
      */
     public function getMinorVersion()
@@ -204,10 +203,10 @@ class Meta
     }
 
     /**
-     * Retrieve patchVersion
+     * Retrieve patchVersion.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return int
      */
     public function getPatchVersion()
@@ -216,10 +215,10 @@ class Meta
     }
 
     /**
-     * Retrieve deviceOsVersion
+     * Retrieve deviceOsVersion.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return null|string
      */
     public function getDeviceOsVersion()
@@ -228,10 +227,10 @@ class Meta
     }
 
     /**
-     * Retrieve device
+     * Retrieve device.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return string
      */
     public function getDevice()
@@ -240,10 +239,10 @@ class Meta
     }
 
     /**
-     * toArray
+     * toArray.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return array
      */
     public function toArray()
