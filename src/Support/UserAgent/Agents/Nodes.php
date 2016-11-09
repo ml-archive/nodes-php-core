@@ -75,7 +75,7 @@ class Nodes
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string  $userAgent
+     * @param string $userAgent
      */
     public function __construct($userAgent)
     {
@@ -96,7 +96,7 @@ class Nodes
     protected function parse()
     {
         // Parse Nodes user agent
-        if (! preg_match('|Nodes/(.*)\s\((.*)\)|s', $this->userAgent, $match)) {
+        if (!preg_match('|Nodes/(.*)\s\((.*)\)|s', $this->userAgent, $match)) {
             return;
         }
 
@@ -107,12 +107,12 @@ class Nodes
         $parameters = explode(',', $parameters);
 
         // Set version if available
-        if (! empty($version)) {
+        if (!empty($version)) {
             $this->setVersion($version);
         }
 
         // Set parameters if available
-        if (! empty($parameters)) {
+        if (!empty($parameters)) {
             $this->setParameters($parameters);
         }
 
@@ -125,7 +125,8 @@ class Nodes
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $version
+     * @param string $version
+     *
      * @return $this
      */
     public function setVersion($version)
@@ -140,9 +141,9 @@ class Nodes
         }
 
         // Set major, minor and patch version
-        $this->majorVersion = (int) isset($version[0])? $version[0] : 0;
-        $this->minorVersion = (int) isset($version[1])? $version[1] : 0;
-        $this->patchVersion = (int) isset($version[2])? $version[2] : 0;
+        $this->majorVersion = (int) isset($version[0]) ? $version[0] : 0;
+        $this->minorVersion = (int) isset($version[1]) ? $version[1] : 0;
+        $this->patchVersion = (int) isset($version[2]) ? $version[2] : 0;
 
         return $this;
     }
@@ -152,7 +153,8 @@ class Nodes
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  array $parameters
+     * @param array $parameters
+     *
      * @return $this
      */
     public function setParameters(array $parameters)
@@ -295,14 +297,14 @@ class Nodes
     public function toArray()
     {
         return [
-            'userAgent' => $this->userAgent,
-            'version' => $this->version,
+            'userAgent'    => $this->userAgent,
+            'version'      => $this->version,
             'majorVersion' => $this->majorVersion,
             'minorVersion' => $this->minorVersion,
             'patchVersion' => $this->patchVersion,
-            'debug' => $this->debug,
-            'platform' => $this->platform,
-            'device' => $this->device,
+            'debug'        => $this->debug,
+            'platform'     => $this->platform,
+            'device'       => $this->device,
         ];
     }
 }

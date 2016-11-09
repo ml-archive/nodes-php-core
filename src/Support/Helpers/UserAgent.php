@@ -1,6 +1,6 @@
 <?php
 
-if (! function_exists('nodes_user_agent')) {
+if (!function_exists('nodes_user_agent')) {
     /**
      * Retrieve Nodes user agent.
      *
@@ -16,7 +16,7 @@ if (! function_exists('nodes_user_agent')) {
     }
 }
 
-if (! function_exists('user_agent')) {
+if (!function_exists('user_agent')) {
     /**
      * Retrieve original user agent.
      *

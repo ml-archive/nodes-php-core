@@ -51,7 +51,7 @@ class ServiceProvider extends IlluminateServiceProvider
         // Config files
         $this->publishes([
             __DIR__.'/../config/autoload.php' => config_path('nodes/autoload.php'),
-            __DIR__.'/../config/project.php' => config_path('nodes/project.php'),
+            __DIR__.'/../config/project.php'  => config_path('nodes/project.php'),
         ], 'config');
     }
 
@@ -65,7 +65,7 @@ class ServiceProvider extends IlluminateServiceProvider
     protected function registerBrowscap()
     {
         $this->app->singleton(Browscap::class, function ($app) {
-            $browscap = new Browscap;
+            $browscap = new Browscap();
 
             // Cache for 90 days
             $browscap->setCache(new BrowscapCache(
@@ -119,7 +119,7 @@ class ServiceProvider extends IlluminateServiceProvider
             $itemPath = base_path($item);
 
             // If item doesn't exist, we'll skip it.
-            if (! file_exists($itemPath)) {
+            if (!file_exists($itemPath)) {
                 continue;
             }
 

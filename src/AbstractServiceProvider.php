@@ -137,13 +137,15 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @return void
+     *
      * @throws \Nodes\Exceptions\InstallPackageException
+     *
+     * @return void
      */
     final public function install()
     {
         // Initiate Flysystem
-        $this->files = new Filesystem;
+        $this->files = new Filesystem();
 
         // Make sure we have the Console Output style
         // before continuing with the install sequence
@@ -285,6 +287,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @abstract
+     *
      * @return void
      */
     protected function installScaffolding()
@@ -297,6 +300,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @abstract
+     *
      * @return void
      */
     protected function installCustom()
@@ -336,7 +340,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
     {
         // Ask to migrate the database,
         // if we've copied any migration files to the application.
-        if (! empty($this->migrations) && $this->getCommand()->confirm('Do you wish to migrate your database?', true)) {
+        if (!empty($this->migrations) && $this->getCommand()->confirm('Do you wish to migrate your database?', true)) {
             try {
                 $this->getCommand()->call('migrate');
             } catch (Exception $e) {
@@ -357,7 +361,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
 
         // Ask to seed the database,
         // if we've copied any migration files to the application.
-        if (! empty($seeders) && $this->getCommand()->confirm('Do you wish to seed your database?', true)) {
+        if (!empty($seeders) && $this->getCommand()->confirm('Do you wish to seed your database?', true)) {
             // Load seeders directory so new seeders are available
             load_directory($this->getInstaller()->getBasePath('database/seeds/'));
 
@@ -380,7 +384,8 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  array $data
+     * @param array $data
+     *
      * @return void
      */
     final protected function copyFilesAndDirectories(array $data)
@@ -406,8 +411,9 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $from
-     * @param  string $to
+     * @param string $from
+     * @param string $to
+     *
      * @return void
      */
     final protected function publishFile($from, $to)
@@ -415,7 +421,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         // If destination directory doesn't exist,
         // we'll create before copying the config files
         $directoryDestination = dirname($to);
-        if (! $this->files->isDirectory($directoryDestination)) {
+        if (!$this->files->isDirectory($directoryDestination)) {
             $this->files->makeDirectory($directoryDestination, 0755, true);
         }
 
@@ -434,8 +440,9 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $from
-     * @param  string $to
+     * @param string $from
+     * @param string $to
+     *
      * @return void
      */
     final protected function publishDirectory($from, $to)
@@ -443,7 +450,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         // Load mount manager
         $manager = new MountManager([
             'from' => new Flysystem(new LocalAdapter($from)),
-            'to' => new Flysystem(new LocalAdapter($to)),
+            'to'   => new Flysystem(new LocalAdapter($to)),
         ]);
 
         // Copy directory to application
@@ -466,8 +473,9 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $command
-     * @param  array $params
+     * @param string $command
+     * @param array  $params
+     *
      * @return int
      */
     final protected function callArtisanCommand($command, array $params = [])
@@ -476,14 +484,14 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
         $inputArguments = ['NodesInstall', $command];
 
         // Add artisan parameters to input arguments
-        if (! empty($params) && is_array($params)) {
+        if (!empty($params) && is_array($params)) {
             $inputArguments[] = implode(' ', $params);
         }
 
         // Execute Artisan command
         return $this->getInstaller()->getArtisan()->handle(
             new SymfonyConsoleInput($inputArguments),
-            new SymfonyConsoleOutput
+            new SymfonyConsoleOutput()
         );
     }
 
@@ -493,7 +501,9 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @param  string $vendor
+     *
+     * @param string $vendor
+     *
      * @return $this
      */
     final public function setVendor($vendor)
@@ -509,6 +519,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
+     *
      * @return string
      */
     final public function getVendor()
@@ -522,7 +533,9 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
-     * @param  string $package
+     *
+     * @param string $package
+     *
      * @return $this
      */
     final public function setPackage($package)
@@ -538,6 +551,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
+     *
      * @return string|null
      */
     final public function getPackage()
@@ -551,6 +565,7 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      * @author Morten Rugaard <moru@nodes.dk>
      *
      * @final
+     *
      * @return array
      */
     final public function getFacades()
@@ -563,7 +578,8 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  \Nodes\Support\InstallPackage $installer
+     * @param \Nodes\Support\InstallPackage $installer
+     *
      * @return $this
      */
     public function setInstaller(NodesInstaller $installer)
@@ -590,7 +606,8 @@ abstract class AbstractServiceProvider extends IlluminateServiceProvider
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  \Illuminate\Console\Command $command
+     * @param \Illuminate\Console\Command $command
+     *
      * @return $this
      */
     public function setCommand(IlluminateCommand $command)

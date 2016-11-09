@@ -1,12 +1,13 @@
 <?php
 
-if (! function_exists('nodes_install_service_provider')) {
+if (!function_exists('nodes_install_service_provider')) {
     /**
      * Install service provider for a Nodes package.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $package
+     * @param string $package
+     *
      * @return string
      */
     function nodes_install_service_provider($package)
@@ -19,14 +20,15 @@ if (! function_exists('nodes_install_service_provider')) {
     }
 }
 
-if (! function_exists('nodes_install_facades')) {
+if (!function_exists('nodes_install_facades')) {
     /**
      * Install facades used by a Nodes package.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string                         $package
-     * @param  \Nodes\AbstractServiceProvider $serviceProvider
+     * @param string                         $package
+     * @param \Nodes\AbstractServiceProvider $serviceProvider
+     *
      * @return bool
      */
     function nodes_install_facades($package, \Nodes\AbstractServiceProvider $serviceProvider)
@@ -39,13 +41,14 @@ if (! function_exists('nodes_install_facades')) {
     }
 }
 
-if (! function_exists('nodes_is_package_installed')) {
+if (!function_exists('nodes_is_package_installed')) {
     /**
      * Check if a Nodes package is already installed.
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $package
+     * @param string $package
+     *
      * @return bool
      */
     function nodes_is_package_installed($package)

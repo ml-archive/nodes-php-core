@@ -2,8 +2,8 @@
 
 namespace Nodes\Support\UserAgent\Agents;
 
-use Exception;
 use BrowscapPHP\Browscap;
+use Exception;
 
 /**
  * Class Original.
@@ -113,7 +113,7 @@ class Original
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $userAgent
+     * @param string $userAgent
      */
     public function __construct($userAgent)
     {
@@ -149,13 +149,13 @@ class Original
             // Switch it up!
             switch ($key) {
                 case 'ismobiledevice':
-                    $this->isMobile = ! empty($value);
+                    $this->isMobile = !empty($value);
                     break;
                 case 'istablet':
-                    $this->isTablet = ! empty($value);
+                    $this->isTablet = !empty($value);
                     break;
                 case 'crawler':
-                    $this->isCrawler = ! empty($value);
+                    $this->isCrawler = !empty($value);
                     break;
                 case 'majorver':
                     $this->majorVersion = (int) $value;
@@ -196,7 +196,8 @@ class Original
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $version
+     * @param string $version
+     *
      * @return $this
      */
     protected function setVersion($version)
@@ -214,8 +215,8 @@ class Original
             $version = explode('.', $version);
 
             // Set major and minor version
-            $this->majorVersion = (int) isset($version[0])? $version[0] : 0;
-            $this->minorVersion = (int) isset($version[1])? $version[1] : 0;
+            $this->majorVersion = (int) isset($version[0]) ? $version[0] : 0;
+            $this->minorVersion = (int) isset($version[1]) ? $version[1] : 0;
         } else {
             $this->majorVersion = (int) $version;
         }
@@ -401,19 +402,19 @@ class Original
     public function toArray()
     {
         return [
-            'userAgent' => $this->userAgent,
-            'browser' => $this->browser,
-            'version' => $this->version,
-            'majorVersion' => $this->majorVersion,
-            'minorVersion' => $this->minorVersion,
+            'userAgent'          => $this->userAgent,
+            'browser'            => $this->browser,
+            'version'            => $this->version,
+            'majorVersion'       => $this->majorVersion,
+            'minorVersion'       => $this->minorVersion,
             'browserWithVersion' => $this->browserWithVersion,
-            'publisher' => $this->publisher,
-            'platform' => $this->platform,
-            'device' => $this->device,
-            'devicePointer' => $this->devicePointer,
-            'isMobile' => $this->isMobile,
-            'isTablet' => $this->isTablet(),
-            'isCrawler' => $this->isCrawler,
+            'publisher'          => $this->publisher,
+            'platform'           => $this->platform,
+            'device'             => $this->device,
+            'devicePointer'      => $this->devicePointer,
+            'isMobile'           => $this->isMobile,
+            'isTablet'           => $this->isTablet(),
+            'isCrawler'          => $this->isCrawler,
         ];
     }
 }
