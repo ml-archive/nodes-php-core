@@ -38,6 +38,8 @@ class Parser
      */
     protected $meta;
 
+    const NODES_META_HEADER = 'N-Meta';
+
     /**
      * UserAgent constructor.
      *
@@ -51,9 +53,10 @@ class Parser
         // X-User-Agent is supported since some browsers / platforms override User-Agent header
         $this->userAgent = $userAgent = $request->header('X-User-Agent') ?: $request->header('User-Agent');
 
-//        if ($request->header('X-N-Meta')) {
-        $this->meta = new NodesMeta($request->header('X-N-Meta'));
-//        }
+        // Set nodes meta
+        if ($request->header(self::NODES_META_HEADER)) {
+            $this->meta = new NodesMeta($request->header(self::NODES_META_HEADER));
+        }
 
         // Parse received user agent
         $this->parse($userAgent);
