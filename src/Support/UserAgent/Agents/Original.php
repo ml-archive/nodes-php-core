@@ -214,8 +214,8 @@ class Original
             $version = explode('.', $version);
 
             // Set major and minor version
-            $this->majorVersion = (int) $version[0];
-            $this->minorVersion = (int) $version[1];
+            $this->majorVersion = (int) isset($version[0])? $version[0] : 0;
+            $this->minorVersion = (int) isset($version[1])? $version[1] : 0;
         } else {
             $this->majorVersion = (int) $version;
         }

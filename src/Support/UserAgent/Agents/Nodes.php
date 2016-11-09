@@ -140,9 +140,9 @@ class Nodes
         }
 
         // Set major, minor and patch version
-        $this->majorVersion = (int) $version[0];
-        $this->minorVersion = (int) $version[1];
-        $this->patchVersion = (int) $version[2];
+        $this->majorVersion = (int) isset($version[0])? $version[0] : 0;
+        $this->minorVersion = (int) isset($version[1])? $version[1] : 0;
+        $this->patchVersion = (int) isset($version[2])? $version[2] : 0;
 
         return $this;
     }
