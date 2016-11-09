@@ -1,6 +1,6 @@
 <?php
 
-if (! function_exists('headers')) {
+if (!function_exists('headers')) {
     /**
      * Retrieve one or more headers from request.
      *
@@ -8,7 +8,8 @@ if (! function_exists('headers')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  array $keys
+     * @param array $keys
+     *
      * @return array
      */
     function headers(array $keys = [])
@@ -23,7 +24,7 @@ if (! function_exists('headers')) {
         $headers = [];
 
         foreach ($requestHeaders as $requestHeader => $value) {
-            if (! empty($keys) && ! in_array($requestHeader, $keys)) {
+            if (!empty($keys) && !in_array($requestHeader, $keys)) {
                 continue;
             }
 
