@@ -54,7 +54,8 @@ class Parser
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $userAgent
+     * @param string $userAgent
+     *
      * @return void
      */
     protected function parse($userAgent)
@@ -85,7 +86,8 @@ class Parser
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $nodesUserAgent
+     * @param string $nodesUserAgent
+     *
      * @return \Nodes\Support\UserAgent\Agents\Nodes|bool
      */
     protected function parseNodesUserAgent($nodesUserAgent)
@@ -98,7 +100,8 @@ class Parser
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $originalUserAgent
+     * @param string $originalUserAgent
+     *
      * @return \Nodes\Support\UserAgent\Agents\Original
      */
     protected function parseOriginalUserAgent($originalUserAgent)
