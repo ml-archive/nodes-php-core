@@ -126,6 +126,7 @@ class Parser
      * Retrieve Nodes user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
+     *
      * @return string
      */
     public function getNodesUserAgent()
@@ -137,6 +138,7 @@ class Parser
      * Retrieve original user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
+     *
      * @return string
      */
     public function getOriginalUserAgent()
@@ -145,10 +147,10 @@ class Parser
     }
 
     /**
-     * getNodesMeta
+     * getNodesMeta.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @return \Nodes\Support\Agents\Meta|null
      */
     public function getNodesMeta()
