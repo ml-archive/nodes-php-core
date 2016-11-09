@@ -1,6 +1,6 @@
 <?php
 
-namespace Nodes\Support\Meta;
+namespace Nodes\Support\UserAgent\Agents;
 
 use Nodes\Exceptions\BadRequestException;
 
@@ -141,5 +141,122 @@ class Meta
         }
 
         $this->device = $headerArr[4];
+    }
+
+    /**
+     * Retrieve platform
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return string
+     */
+    public function getPlatform()
+    {
+        return $this->platform;
+    }
+
+    /**
+     * Retrieve environment
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return string
+     */
+    public function getEnvironment()
+    {
+        return $this->environment;
+    }
+
+    /**
+     * Retrieve version
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return string
+     */
+    public function getVersion()
+    {
+        return $this->version;
+    }
+
+    /**
+     * Retrieve majorVersion
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return int
+     */
+    public function getMajorVersion()
+    {
+        return $this->majorVersion;
+    }
+
+    /**
+     * Retrieve minorVersion
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return int
+     */
+    public function getMinorVersion()
+    {
+        return $this->minorVersion;
+    }
+
+    /**
+     * Retrieve patchVersion
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return int
+     */
+    public function getPatchVersion()
+    {
+        return $this->patchVersion;
+    }
+
+    /**
+     * Retrieve deviceOsVersion
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return null|string
+     */
+    public function getDeviceOsVersion()
+    {
+        return $this->deviceOsVersion;
+    }
+
+    /**
+     * Retrieve device
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return string
+     */
+    public function getDevice()
+    {
+        return $this->device;
+    }
+
+    /**
+     * toArray
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'platform'        => $this->platform,
+            'environment'     => $this->environment,
+            'version'         => $this->version,
+            'majorVersion'    => $this->majorVersion,
+            'minorVersion'    => $this->minorVersion,
+            'patchVersion'    => $this->patchVersion,
+            'deviceOsVersion' => $this->deviceOsVersion,
+            'device'          => $this->device,
+        ];
     }
 }

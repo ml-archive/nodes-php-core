@@ -9,6 +9,14 @@ namespace Nodes\Exceptions;
  */
 class BadRequestException extends Exception
 {
+    /**
+     * BadRequestException constructor
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     *
+     * @param string $message
+     */
     public function __construct($message)
     {
         parent::__construct($message, 400);

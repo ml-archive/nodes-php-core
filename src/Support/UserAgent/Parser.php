@@ -3,6 +3,7 @@
 namespace Nodes\Support\UserAgent;
 
 use Illuminate\Http\Request;
+use Nodes\Support\UserAgent\Agents\Meta as NodesMeta;
 use Nodes\Support\UserAgent\Agents\Nodes as NodesUserAgent;
 use Nodes\Support\UserAgent\Agents\Original as OriginalUserAgent;
 
@@ -33,6 +34,11 @@ class Parser
     protected $nodesUserAgent;
 
     /**
+     * @var \Nodes\Support\UserAgent\Agents\Meta|null
+     */
+    protected $meta;
+
+    /**
      * UserAgent constructor.
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -44,6 +50,10 @@ class Parser
         // Retrieve user agent from request header
         // X-User-Agent is supported since some browsers / platforms override User-Agent header
         $this->userAgent = $userAgent = $request->header('X-User-Agent') ?: $request->header('User-Agent');
+
+//        if ($request->header('X-N-Meta')) {
+        $this->meta = new NodesMeta($request->header('X-N-Meta'));
+//        }
 
         // Parse received user agent
         $this->parse($userAgent);
@@ -113,7 +123,6 @@ class Parser
      * Retrieve Nodes user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return string
      */
     public function getNodesUserAgent()
@@ -125,11 +134,22 @@ class Parser
      * Retrieve original user agent.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return string
      */
     public function getOriginalUserAgent()
     {
         return $this->originalUserAgent;
+    }
+
+    /**
+     * getNodesMeta
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return \Nodes\Support\Agents\Meta|null
+     */
+    public function getNodesMeta()
+    {
+        return $this->meta;
     }
 }
