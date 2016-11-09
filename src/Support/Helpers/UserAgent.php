@@ -6,6 +6,7 @@ if ( ! function_exists('nodes_user_agent')) {
      *
      * @author Morten Rugaard <moru@nodes.dk>
      * @return \Nodes\Support\UserAgent\Agents\Nodes|null
+     * @deprecated
      */
     function nodes_user_agent()
     {
