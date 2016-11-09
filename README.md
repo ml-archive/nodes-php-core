@@ -69,6 +69,10 @@ If you want to overwrite any existing config files use the `--force` paramter
 php artisan vendor:publish --provider="Nodes\ServiceProvider" --force
 ```
 
+## Notes
+
+If you are using the `Nodes\Http\Request\FormRequest` present in this class, you will notice that on Web calls if validation fails it will report the exception (this does not interfere with the UX). This can be avoided by adding `Illuminate\Validation\ValidationException` to the `$dontReport` array on `app/Exceptions/Handler.php`. This is not needed for API calls since the exception will be `Nodes\Validation\Exceptions\ValidationException` and this does not report by default.
+
 ## 🏆 Credits
 
 This package is developed and maintained by the PHP team at [Nodes](http://nodesagency.com)

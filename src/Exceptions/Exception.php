@@ -128,11 +128,11 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string  $message   Error message
-     * @param  int $code      Error code
-     * @param  array   $headers   List of headers
-     * @param  bool $report    Wether or not exception should be reported
-     * @param  string  $severity  Options: "fatal", "error", "warning", "info"
+     * @param string $message  Error message
+     * @param int    $code     Error code
+     * @param array  $headers  List of headers
+     * @param bool   $report   Wether or not exception should be reported
+     * @param string $severity Options: "fatal", "error", "warning", "info"
      */
     public function __construct($message, $code, $headers = [], $report = true, $severity = 'error')
     {
@@ -152,7 +152,7 @@ class Exception extends CoreException implements HttpExceptionInterface
         $this->setSeverity($severity);
 
         // Set an empty message bag
-        $this->setErrors(new MessageBag);
+        $this->setErrors(new MessageBag());
     }
 
     /**
@@ -160,7 +160,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string|int $code
+     * @param string|int $code
+     *
      * @return $this
      */
     public function setCode($code)
@@ -178,8 +179,9 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  int $statusCode
-     * @param  string  $message
+     * @param int    $statusCode
+     * @param string $message
+     *
      * @return $this
      */
     public function setStatusCode($statusCode, $message = null)
@@ -190,7 +192,7 @@ class Exception extends CoreException implements HttpExceptionInterface
         $this->addMeta(['status' => ['code' => (int) $statusCode]]);
 
         // Set optional status message if present
-        if (! empty($message)) {
+        if (!empty($message)) {
             $this->setStatusMessage($message);
         }
 
@@ -214,7 +216,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $message
+     * @param string $message
+     *
      * @return $this
      */
     public function setStatusMessage($message)
@@ -244,7 +247,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  array $headers
+     * @param array $headers
+     *
      * @return $this
      */
     public function setHeaders(array $headers)
@@ -299,7 +303,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  bool $report
+     * @param bool $report
+     *
      * @return $this
      */
     public function setReport($report)
@@ -326,7 +331,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  array $meta
+     * @param array $meta
+     *
      * @return $this
      */
     public function addMeta(array $meta)
@@ -353,7 +359,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $type
+     * @param string $type
+     *
      * @return $this
      */
     public function setType($type)
@@ -380,7 +387,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $context
+     * @param string $context
+     *
      * @return $this
      */
     public function setContext($context)
@@ -409,7 +417,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  string $severity
+     * @param string $severity
+     *
      * @return $this
      */
     public function setSeverity($severity)
@@ -438,7 +447,8 @@ class Exception extends CoreException implements HttpExceptionInterface
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
-     * @param  \Illuminate\Support\MessageBag $errors
+     * @param \Illuminate\Support\MessageBag $errors
+     *
      * @return $this
      */
     public function setErrors(MessageBag $errors)
@@ -446,7 +456,7 @@ class Exception extends CoreException implements HttpExceptionInterface
         $this->errors = $errors;
 
         // Add status message to meta array
-        if (! $errors->isEmpty()) {
+        if (!$errors->isEmpty()) {
             $this->addMeta(['errors' => $errors->all()]);
         }
 
@@ -474,6 +484,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      */
     public function hasErrors()
     {
-        return ! $this->errors->isEmpty();
+        return !$this->errors->isEmpty();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Nodes\Jobs;
@@ -15,17 +16,18 @@ class QueueMonitorJob implements ShouldQueue
     use InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * fire
+     * fire.
      *
      * @author Casper Rasmussen <cr@nodes.dk>
-     * @access public
+     *
      * @param \Illuminate\Contracts\Queue\Job $job
      * @param                                 $queuName
+     *
      * @return void
      */
     public function fire(Job $job, $queuName)
     {
-        (new Client())->patch('https://nstack2.like.st/api/queues/monitors/' . $queuName);
+        (new Client())->patch('https://nstack2.like.st/api/queues/monitors/'.$queuName);
 
         $job->delete();
     }
