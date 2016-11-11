@@ -52,7 +52,7 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->publishes([
             __DIR__.'/../config/autoload.php' => config_path('nodes/autoload.php'),
             __DIR__.'/../config/project.php'  => config_path('nodes/project.php'),
-            __DIR__.'/../config/project.php'  => config_path('nodes/meta.php'),
+            __DIR__.'/../config/meta.php'  => config_path('nodes/meta.php'),
         ], 'config');
     }
 
