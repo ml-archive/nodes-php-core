@@ -27,7 +27,7 @@ class QueueMonitorJob implements ShouldQueue
      */
     public function fire(Job $job, $queueName)
     {
-        (new Client())->patch('https://nstack.io/api/queues/monitors/'. $queueName);
+        (new Client())->patch('https://nstack.io/api/queues/monitors/'.$queueName);
 
         $job->delete();
     }
