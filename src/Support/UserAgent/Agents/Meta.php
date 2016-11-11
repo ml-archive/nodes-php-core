@@ -66,7 +66,7 @@ class Meta
     const PLATFORM_WEB = 'web';
 
     /**
-     * platforms
+     * platforms.
      *
      * @var array
      */
@@ -79,7 +79,7 @@ class Meta
     const ENV_PRODUCTION = 'production';
 
     /**
-     * environments
+     * environments.
      *
      * @var array
      */
@@ -267,12 +267,12 @@ class Meta
     }
 
     /**
-     * getMetaEnvironments
+     * getMetaEnvironments.
      *
      * @author Rasmus Ebbesen <re@nodes.dk>
      *
      * @static
-     * @access public
+     *
      * @return array
      */
     public static function getMetaEnvironments()
@@ -285,12 +285,12 @@ class Meta
     }
 
     /**
-     * getMetaPlatforms
+     * getMetaPlatforms.
      *
      * @author Rasmus Ebbesen <re@nodes.dk>
      *
      * @static
-     * @access public
+     *
      * @return array
      */
     public static function getMetaPlatforms()
@@ -302,5 +302,4 @@ class Meta
             self::PLATFORM_WEB,
         ], config('nodes.meta.platforms'));
     }
-
 }
