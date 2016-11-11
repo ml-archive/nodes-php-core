@@ -281,7 +281,7 @@ class Meta
             self::ENV_DEVELOPMENT,
             self::ENV_STAGING,
             self::ENV_PRODUCTION,
-        ], config('nodes.meta.environments'));
+        ], config('nodes.meta.environments', []));
     }
 
     /**
@@ -300,6 +300,6 @@ class Meta
             self::PLATFORM_ANDROID,
             self::PLATFORM_WINDOWS,
             self::PLATFORM_WEB,
-        ], config('nodes.meta.platforms'));
+        ], config('nodes.meta.platforms', []));
     }
 }
