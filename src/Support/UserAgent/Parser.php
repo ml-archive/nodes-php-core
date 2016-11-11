@@ -151,7 +151,7 @@ class Parser
      *
      * @author Casper Rasmussen <cr@nodes.dk>
      *
-     * @return \Nodes\Support\Agents\Meta|null
+     * @return \Nodes\Support\UserAgent\Agents\Meta|null
      */
     public function getNodesMeta()
     {

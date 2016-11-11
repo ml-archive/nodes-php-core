@@ -65,12 +65,12 @@ class Meta
 
     const PLATFORM_WEB = 'web';
 
-    const PLATFORMS = [
-        self::PLATFORM_IOS,
-        self::PLATFORM_ANDROID,
-        self::PLATFORM_WINDOWS,
-        self::PLATFORM_WEB,
-    ];
+    /**
+     * platforms
+     *
+     * @var array
+     */
+    protected $platforms;
 
     const ENV_DEVELOPMENT = 'development';
 
@@ -78,11 +78,12 @@ class Meta
 
     const ENV_PRODUCTION = 'production';
 
-    const ENVIRONMENTS = [
-        self::ENV_DEVELOPMENT,
-        self::ENV_STAGING,
-        self::ENV_PRODUCTION,
-    ];
+    /**
+     * environments
+     *
+     * @var array
+     */
+    protected $environments;
 
     /**
      * Meta constructor.
@@ -97,9 +98,15 @@ class Meta
     {
         $headerArr = explode(';', $header);
 
+        // Load platforms from config
+        $this->platforms = self::getMetaPlatforms();
+
+        // Load environments from config
+        $this->environments = self::getMetaEnvironments();
+
         // Parse platform
-        if (!isset($headerArr[0]) || !in_array($headerArr[0], self::PLATFORMS)) {
-            throw new BadRequestException('Platform is not supported, should be: '.implode(',', self::PLATFORMS));
+        if (!isset($headerArr[0]) || !in_array($headerArr[0], $this->platforms)) {
+            throw new BadRequestException('Platform is not supported, should be: '.implode(',', $this->platforms));
         }
 
         $this->platform = $headerArr[0];
@@ -110,8 +117,8 @@ class Meta
         }
 
         // Parse env
-        if (!isset($headerArr[1]) || !in_array($headerArr[1], self::ENVIRONMENTS)) {
-            throw new BadRequestException('Environment is not supported, should be: '.implode(',', self::ENVIRONMENTS));
+        if (!isset($headerArr[1]) || !in_array($headerArr[1], $this->environments)) {
+            throw new BadRequestException('Environment is not supported, should be: '.implode(',', $this->environments));
         }
 
         $this->environment = $headerArr[1];
@@ -258,4 +265,42 @@ class Meta
             'device'          => $this->device,
         ];
     }
+
+    /**
+     * getMetaEnvironments
+     *
+     * @author Rasmus Ebbesen <re@nodes.dk>
+     *
+     * @static
+     * @access public
+     * @return array
+     */
+    public static function getMetaEnvironments()
+    {
+        return array_merge([
+            self::ENV_DEVELOPMENT,
+            self::ENV_STAGING,
+            self::ENV_PRODUCTION,
+        ], config('nodes.meta.environments'));
+    }
+
+    /**
+     * getMetaPlatforms
+     *
+     * @author Rasmus Ebbesen <re@nodes.dk>
+     *
+     * @static
+     * @access public
+     * @return array
+     */
+    public static function getMetaPlatforms()
+    {
+        return array_merge([
+            self::PLATFORM_IOS,
+            self::PLATFORM_ANDROID,
+            self::PLATFORM_WINDOWS,
+            self::PLATFORM_WEB,
+        ], config('nodes.meta.platforms'));
+    }
+
 }
