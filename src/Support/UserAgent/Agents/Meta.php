@@ -117,7 +117,7 @@ class Meta
         }
 
         $this->environment = $headerArr[1];
-        
+
         // Web does not have further requirements, since they have a normal User-Agent header
         if ($this->platform == self::PLATFORM_WEB) {
             return;
