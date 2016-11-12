@@ -111,17 +111,17 @@ class Meta
 
         $this->platform = $headerArr[0];
 
-        // Web does not have further requirements, since they have a normal
-        if ($this->platform == self::PLATFORM_WEB) {
-            return;
-        }
-
         // Parse env
         if (!isset($headerArr[1]) || !in_array($headerArr[1], $this->environments)) {
             throw new BadRequestException('Environment is not supported, should be: '.implode(',', $this->environments));
         }
 
         $this->environment = $headerArr[1];
+        
+        // Web does not have further requirements, since they have a normal User-Agent header
+        if ($this->platform == self::PLATFORM_WEB) {
+            return;
+        }
 
         // Parse Build number
         if (!isset($headerArr[2])) {
