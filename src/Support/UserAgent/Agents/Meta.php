@@ -78,6 +78,8 @@ class Meta
 
     const ENV_PRODUCTION = 'production';
 
+    const ENV_LOCAL = 'local';
+
     /**
      * environments.
      *
@@ -278,6 +280,7 @@ class Meta
     public static function getMetaEnvironments()
     {
         return array_merge([
+            self::ENV_LOCAL,
             self::ENV_DEVELOPMENT,
             self::ENV_STAGING,
             self::ENV_PRODUCTION,
