@@ -49,7 +49,7 @@ class Parser
      */
     public function __construct(Request $request)
     {
-        if ($request->method() == 'OPTIONS')  {
+        if ($request->method() == 'OPTIONS') {
             return;
         }
 
