@@ -49,6 +49,10 @@ class Parser
      */
     public function __construct(Request $request)
     {
+        if ($request->method() == 'OPTIONS')  {
+            return;
+        }
+
         // Retrieve user agent from request header
         // X-User-Agent is supported since some browsers / platforms override User-Agent header
         $this->userAgent = $userAgent = $request->header('X-User-Agent') ?: $request->header('User-Agent');
