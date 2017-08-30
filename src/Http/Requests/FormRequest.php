@@ -23,7 +23,6 @@ class FormRequest extends IlluminateFormRequest
      */
     private $dingoRequestClass = 'Dingo\Api\Http\Request';
 
-
     /**
      * @var array
      */
