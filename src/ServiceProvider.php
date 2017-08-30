@@ -65,10 +65,10 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function registerBrowscap()
     {
-        if(!config('nodes.project.browsecap', true)) {
+        if (!config('nodes.project.browsecap', true)) {
             return;
         }
-        
+
         $this->app->singleton(Browscap::class, function ($app) {
             $browscap = new Browscap();
 
