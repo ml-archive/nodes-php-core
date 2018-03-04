@@ -124,10 +124,14 @@ class Exception extends CoreException implements HttpExceptionInterface
     protected $errors;
 
     /**
+     * @var string|null
+     */
+    protected $localeMessage;
+
+    /**
      * Exception constructor.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param string $message  Error message
      * @param int    $code     Error code
      * @param array  $headers  List of headers
@@ -159,9 +163,7 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Set exception code.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param string|int $code
-     *
      * @return $this
      */
     public function setCode($code)
@@ -175,21 +177,61 @@ class Exception extends CoreException implements HttpExceptionInterface
     }
 
     /**
+     * setMessage
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @param $message
+     * @return $this
+     */
+    public function setMessage($message)
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * setLocaleMessage
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @param $localeMessage
+     * @return $this
+     */
+    public function setLocaleMessage($localeMessage)
+    {
+        $this->localeMessage = $localeMessage;
+
+        return $this;
+    }
+
+    /**
+     * getLocaleMessage
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     * @access public
+     * @return null|string
+     */
+    public function getLocaleMessage()
+    {
+        return $this->localeMessage;
+    }
+
+    /**
      * Set status code.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param int    $statusCode
      * @param string $message
-     *
      * @return $this
      */
     public function setStatusCode($statusCode, $message = null)
     {
-        $this->statusCode = (int) $statusCode;
+        $this->statusCode = (int)$statusCode;
 
         // Add status message to meta array
-        $this->addMeta(['status' => ['code' => (int) $statusCode]]);
+        $this->addMeta(['status' => ['code' => (int)$statusCode]]);
 
         // Set optional status message if present
         if (!empty($message)) {
@@ -203,21 +245,18 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve status code.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return int
      */
     public function getStatusCode()
     {
-        return (int) $this->statusCode;
+        return (int)$this->statusCode;
     }
 
     /**
      * Set status code message.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param string $message
-     *
      * @return $this
      */
     public function setStatusMessage($message)
@@ -234,7 +273,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve status code message.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return string
      */
     public function getStatusMessage()
@@ -246,9 +284,7 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Set headers.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param array $headers
-     *
      * @return $this
      */
     public function setHeaders(array $headers)
@@ -262,19 +298,17 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve headers.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return array
      */
     public function getHeaders()
     {
-        return (array) $this->headers;
+        return (array)$this->headers;
     }
 
     /**
      * Set report flag to true.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return $this
      */
     public function report()
@@ -288,7 +322,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Set report flag to false.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return $this
      */
     public function dontReport()
@@ -302,14 +335,12 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Set whether or not to report exception.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param bool $report
-     *
      * @return $this
      */
     public function setReport($report)
     {
-        $this->report = (bool) $report;
+        $this->report = (bool)$report;
 
         return $this;
     }
@@ -318,26 +349,23 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve whether or not to report exception.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return bool
      */
     public function getReport()
     {
-        return (bool) $this->report;
+        return (bool)$this->report;
     }
 
     /**
      * Add data to existing meta data.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param array $meta
-     *
      * @return $this
      */
     public function addMeta(array $meta)
     {
-        $this->meta = array_merge_recursive((array) $this->meta, $meta);
+        $this->meta = array_merge_recursive((array)$this->meta, $meta);
 
         return $this;
     }
@@ -346,21 +374,18 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve meta data.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return array
      */
     public function getMeta()
     {
-        return (array) $this->meta;
+        return (array)$this->meta;
     }
 
     /**
      * Set exception type.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param string $type
-     *
      * @return $this
      */
     public function setType($type)
@@ -374,7 +399,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve exception type.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return string
      */
     public function getType()
@@ -386,9 +410,7 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Set exception context.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param string $context
-     *
      * @return $this
      */
     public function setContext($context)
@@ -402,7 +424,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve exception context.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return string
      */
     public function getContext()
@@ -412,13 +433,10 @@ class Exception extends CoreException implements HttpExceptionInterface
 
     /**
      * Set severity of exception.
-     *
      * Options: "fatal", "error", "waring", "info"
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param string $severity
-     *
      * @return $this
      */
     public function setSeverity($severity)
@@ -434,7 +452,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve severity of exception.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return string
      */
     public function getSeverity()
@@ -446,9 +463,7 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Set a message bag of errors.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @param \Illuminate\Support\MessageBag $errors
-     *
      * @return $this
      */
     public function setErrors(MessageBag $errors)
@@ -467,7 +482,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Retrieve message bag of errors.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return \Illuminate\Support\MessageBag
      */
     public function getErrors()
@@ -479,7 +493,6 @@ class Exception extends CoreException implements HttpExceptionInterface
      * Check if exception has any errors.
      *
      * @author Morten Rugaard <moru@nodes.dk>
-     *
      * @return bool
      */
     public function hasErrors()
