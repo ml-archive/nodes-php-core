@@ -124,6 +124,11 @@ class Exception extends CoreException implements HttpExceptionInterface
     protected $errors;
 
     /**
+     * @var string|null
+     */
+    protected $localeMessage;
+
+    /**
      * Exception constructor.
      *
      * @author Morten Rugaard <moru@nodes.dk>
@@ -172,6 +177,50 @@ class Exception extends CoreException implements HttpExceptionInterface
         $this->addMeta(['code' => $code]);
 
         return $this;
+    }
+
+    /**
+     * setMessage.
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     *
+     * @param $message
+     *
+     * @return $this
+     */
+    public function setMessage($message)
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * setLocaleMessage.
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     *
+     * @param $localeMessage
+     *
+     * @return $this
+     */
+    public function setLocaleMessage($localeMessage)
+    {
+        $this->localeMessage = $localeMessage;
+
+        return $this;
+    }
+
+    /**
+     * getLocaleMessage.
+     *
+     * @author Casper Rasmussen <cr@nodes.dk>
+     *
+     * @return null|string
+     */
+    public function getLocaleMessage()
+    {
+        return $this->localeMessage;
     }
 
     /**
@@ -412,8 +461,7 @@ class Exception extends CoreException implements HttpExceptionInterface
 
     /**
      * Set severity of exception.
-     *
-     * Options: "fatal", "error", "waring", "info"
+     * Options: "fatal", "error", "waring", "info".
      *
      * @author Morten Rugaard <moru@nodes.dk>
      *
