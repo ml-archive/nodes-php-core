@@ -15,11 +15,6 @@
             "name": "Casper Rasmussen",
             "email": "cr@nodes.dk",
             "role": "CTO"
-        },
-        {
-            "name": "Morten Rugaard",
-            "email": "moru@nodes.dk",
-            "role": "Developer"
         }
     ],
     "require": {
