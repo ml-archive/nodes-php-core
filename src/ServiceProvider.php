@@ -3,7 +3,6 @@
 namespace Nodes;
 
 use BrowscapPHP\Browscap;
-use BrowscapPHP\BrowscapUpdater;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
 
@@ -74,12 +73,10 @@ class ServiceProvider extends IlluminateServiceProvider
             $cache = new \Roave\DoctrineSimpleCache\SimpleCacheAdapter($fileCache);
             $logger = new \Monolog\Logger('logger');
 
-
             $browscap = new \BrowscapPHP\Browscap($cache, $logger);
 
             $updater = new \BrowscapPHP\BrowscapUpdater($cache, $logger);
             $updater->update(\BrowscapPHP\Helper\IniLoader::PHP_INI);
-
 
             return $browscap;
         });
