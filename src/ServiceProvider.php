@@ -3,10 +3,8 @@
 namespace Nodes;
 
 use BrowscapPHP\Browscap;
-use BrowscapPHP\Cache\BrowscapCache;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
-use WurflCache\Adapter\File as CacheFile;
 
 /**
  * Class ServiceProvider.
