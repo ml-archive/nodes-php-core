@@ -3,10 +3,8 @@
 namespace Nodes;
 
 use BrowscapPHP\Browscap;
-use BrowscapPHP\Cache\BrowscapCache;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
-use WurflCache\Adapter\File as CacheFile;
 
 /**
  * Class ServiceProvider.
@@ -68,7 +66,6 @@ class ServiceProvider extends IlluminateServiceProvider
         if (!config('nodes.project.browsecap', true)) {
             return;
         }
-
 
         $this->app->singleton(Browscap::class, function ($app) {
             $cacheDir = storage_path('framework/browscap');
