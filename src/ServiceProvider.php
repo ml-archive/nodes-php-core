@@ -70,17 +70,12 @@ class ServiceProvider extends IlluminateServiceProvider
         }
 
         $this->app->singleton(Browscap::class, function ($app) {
-            $browscap = new Browscap();
+            $cacheDir = storage_path('framework/browscap');
+            $fileCache = new \Doctrine\Common\Cache\FilesystemCache($cacheDir);
 
-            // Cache for 90 days
-            $browscap->setCache(new BrowscapCache(
-                new CacheFile([
-                    CacheFile::DIR => storage_path('framework/browscap'),
-                ])
-            ), 7776000);
+            $logger = new \Monolog\Logger('name');
 
-            // Automatically check for updates
-            $browscap->update();
+            $browscap = new \BrowscapPHP\Browscap($cache, $logger);
 
             return $browscap;
         });
