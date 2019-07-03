@@ -3,10 +3,9 @@
 namespace Nodes;
 
 use BrowscapPHP\Browscap;
-use BrowscapPHP\Cache\BrowscapCache;
+use BrowscapPHP\BrowscapUpdater;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Nodes\Support\UserAgent\Parser as NodesUserAgentParser;
-use WurflCache\Adapter\File as CacheFile;
 
 /**
  * Class ServiceProvider.
@@ -65,22 +64,22 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function registerBrowscap()
     {
-        if (!config('nodes.project.browsecap', true)) {
+        if (!config('nodes.project.browsecap', false)) {
             return;
         }
 
         $this->app->singleton(Browscap::class, function ($app) {
-            $browscap = new Browscap();
+            $cacheDir = storage_path('framework/browscap4');
+            $fileCache = new \Doctrine\Common\Cache\FilesystemCache($cacheDir);
+            $cache = new \Roave\DoctrineSimpleCache\SimpleCacheAdapter($fileCache);
+            $logger = new \Monolog\Logger('logger');
 
-            // Cache for 90 days
-            $browscap->setCache(new BrowscapCache(
-                new CacheFile([
-                    CacheFile::DIR => storage_path('framework/browscap'),
-                ])
-            ), 7776000);
 
-            // Automatically check for updates
-            $browscap->update();
+            $browscap = new \BrowscapPHP\Browscap($cache, $logger);
+
+            $updater = new \BrowscapPHP\BrowscapUpdater($cache, $logger);
+            $updater->update(\BrowscapPHP\Helper\IniLoader::PHP_INI);
+
 
             return $browscap;
         });
