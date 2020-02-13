@@ -22,14 +22,14 @@ return [
     |
     */
     'namespace' => 'DummyNamespace',
-    
-      /*
+
+    /*
     |--------------------------------------------------------------------------
     | Load Browscap
     |--------------------------------------------------------------------------
-    | 
+    |
     | Should only be activated if user agent is parsed and used
     |
     */
-    'browscap' => false
+    'browscap' => false,
 ];
