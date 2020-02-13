@@ -16,6 +16,7 @@ class QueueMonitorJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     /**
      * fire.
      *
